@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản Lý Danh Mục - KidsFashion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet"/>
+    <style>
+        :root { --primary:#ff6b9d; --sidebar:#2d3436; }
+        body { font-family:'Nunito',sans-serif; background:#f8f9fa; }
+        .sidebar { width:260px; min-height:100vh; background:var(--sidebar); position:fixed; left:0; top:0; z-index:100; }
+        .sidebar-brand { font-family:'Pacifico',cursive; color:var(--primary); font-size:1.5rem; padding:24px 20px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar-item { display:flex; align-items:center; padding:12px 20px; color:rgba(255,255,255,.7); text-decoration:none; font-weight:600; transition:.2s; border-left:3px solid transparent; }
+        .sidebar-item:hover, .sidebar-item.active { color:#fff; background:rgba(255,107,157,.15); border-left-color:var(--primary); }
+        .sidebar-item i { width:24px; }
+        .main-content { margin-left:260px; padding:24px; }
+        .topbar { background:#fff; border-radius:16px; padding:16px 24px; margin-bottom:24px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .card { border:none; border-radius:16px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .form-control, .form-select { border-radius:10px; padding:10px 16px; border:2px solid #f0d0e0; }
+        .form-control:focus { border-color:var(--primary); box-shadow:0 0 0 .25rem rgba(255,107,157,.15); }
+        .btn-primary { background:var(--primary); border-color:var(--primary); border-radius:10px; font-weight:700; }
+        .btn-primary:hover { background:#e05587; border-color:#e05587; }
+        .table thead th { background:var(--primary); color:#fff; border:none; font-weight:700; padding:14px; }
+        .alert-success { background:#d4f4ea; border-color:#06d6a0; color:#047857; border-radius:12px; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">🧸 KidsFashion</div>
+    <div class="py-2">
+        <a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="/admin/products" class="sidebar-item"><i class="fas fa-tshirt"></i> Quản lý sản phẩm</a>
+        <a href="/admin/categories" class="sidebar-item active"><i class="fas fa-tags"></i> Danh mục</a>
+        <a href="/admin/orders" class="sidebar-item"><i class="fas fa-shopping-bag"></i> Đơn hàng</a>
+        <a href="/admin/users" class="sidebar-item"><i class="fas fa-users"></i> Người dùng</a>
+        <a href="/admin/discounts" class="sidebar-item"><i class="fas fa-percentage"></i> Mã giảm giá</a>
+        <a href="/admin/statistics" class="sidebar-item"><i class="fas fa-chart-bar"></i> Thống kê</a>
+        <hr style="border-color:rgba(255,255,255,.1);margin:12px 20px;"/>
+        <a href="/" class="sidebar-item"><i class="fas fa-store"></i> Về cửa hàng</a>
+        <a href="/logout" class="sidebar-item" style="color:#ff6b9d;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar"><h5 class="mb-0 fw-800">🏷️ Quản Lý Danh Mục</h5></div>
+
+    <div th:if="${success}" class="alert alert-success mb-3">
+        <i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0" id="form-container">
+                <div class="card-body">
+                    <h6 class="fw-800 mb-3">
+                        <i th:class="${category.id == null ? 'fas fa-plus-circle' : 'fas fa-edit'}"
+                           th:style="${category.id == null ? 'color:var(--primary)' : 'color:#f39c12'}"></i>
+                        <span th:text="${category.id == null ? 'Thêm Danh Mục Mới' : 'Đang Chỉnh Sửa Danh Mục'}"></span>
+                    </h6>
+
+                    <form th:action="@{/admin/categories/save}" th:object="${category}" method="post">
+                        <input type="hidden" th:field="*{id}"/>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-700">Tên danh mục <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" th:field="*{name}" placeholder="Ví dụ: Áo thun trẻ em" required/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-700">Mô tả</label>
+                            <textarea class="form-control" th:field="*{description}" rows="3" placeholder="Mô tả danh mục..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" th:field="*{active}"/>
+                                <label class="form-check-label fw-700">Hiển thị danh mục</label>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" th:class="${category.id == null ? 'btn btn-primary' : 'btn btn-warning fw-800 text-white shadow-sm'}">
+                                <i th:class="${category.id == null ? 'fas fa-save me-2' : 'fas fa-check me-2'}"></i>
+                                <span th:text="${category.id == null ? 'Thêm Danh Mục' : 'Lưu Thay Đổi'}"></span>
+                            </button>
+
+                            <a th:if="${category.id != null}" href="/admin/categories" class="btn btn-light rounded-pill fw-bold text-muted btn-sm">
+                                <i class="fas fa-times me-1"></i> Hủy chỉnh sửa
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card border-0">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th class="ps-4">#</th>
+                                <th>Tên danh mục</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th class="text-end pe-4">Thao tác</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="cat, stat : ${categories}" th:classappend="${category.id == cat.id ? 'table-warning animate-pulse' : ''}">
+                                <td class="align-middle ps-4 text-muted" th:text="${stat.index + 1}">1</td>
+                                <td class="align-middle fw-700" th:text="${cat.name}">Tên</td>
+                                <td class="align-middle text-muted small" th:text="${cat.description}">Mô tả</td>
+                                <td class="align-middle">
+                                    <span th:if="${cat.active}" class="badge rounded-pill" style="background:#d4f4ea;color:#047857;">Hoạt động</span>
+                                    <span th:unless="${cat.active}" class="badge rounded-pill" style="background:#ffe0e8;color:#c2185b;">Đã ẩn</span>
+                                </td>
+                                <td class="align-middle text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a th:href="@{/admin/categories(editId=${cat.id})}" class="btn btn-sm btn-outline-primary rounded-circle" title="Sửa">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </a>
+                                        <form th:action="@{/admin/categories/delete/{id}(id=${cat.id})}" method="post" style="display:inline;" onsubmit="return confirm('Xóa danh mục này?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle" title="Xóa">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:if="${category.id != null}">
+    window.onload = function() {
+        const formContainer = document.getElementById('form-container');
+        formContainer.scrollIntoView({ behavior: 'smooth' });
+        // Nháy nhẹ cái form để bác Hải Nam nhận ra chỗ cần sửa
+        formContainer.style.transition = "0.5s";
+        formContainer.style.border = "2px solid #f39c12";
+    }
+</script>
+</body>
+</html>

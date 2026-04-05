@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chi Tiết Đơn Hàng - KidsFashion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet"/>
+    <style>
+        :root { --primary:#ff6b9d; }
+        body { font-family:'Nunito',sans-serif; background:#fff8fb; }
+        .navbar-brand { font-family:'Pacifico',cursive; color:var(--primary)!important; font-size:1.8rem; }
+        .navbar { background:#fff!important; box-shadow:0 2px 15px rgba(255,107,157,.15); }
+        .card { border:none; border-radius:16px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .price-tag { color:var(--primary); font-weight:800; }
+        .table thead th { background:var(--primary); color:#fff; border:none; font-weight:700; }
+        .success-icon { font-size:5rem; }
+        .step { display:flex; align-items:center; flex-direction:column; flex:1; }
+        .step-dot { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.85rem; }
+        .step-line { height:3px; flex:1; }
+        .step-active .step-dot { background:var(--primary); color:#fff; }
+        .step-done .step-dot { background:#06d6a0; color:#fff; }
+        .step-inactive .step-dot { background:#e0e0e0; color:#aaa; }
+        .step-active .step-line, .step-done .step-line { background:var(--primary); }
+        .step-inactive .step-line { background:#e0e0e0; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">🧸 KidsFashion</a>
+        <div class="ms-auto d-flex gap-2">
+            <a href="/orders" class="btn btn-outline-primary rounded-pill"><i class="fas fa-list me-1"></i>Tất cả đơn</a>
+            <a href="/shop" class="btn btn-primary rounded-pill"><i class="fas fa-store me-1"></i>Tiếp tục mua</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container py-5">
+    <!-- SUCCESS BANNER -->
+    <div class="card mb-4 text-center p-4" style="background:linear-gradient(135deg,#d4f4ea,#b7f0d8);">
+        <div class="success-icon">🎉</div>
+        <h4 class="fw-800 mt-2" style="color:#047857;">Đặt hàng thành công!</h4>
+        <p class="text-muted mb-0">Cảm ơn bạn đã mua sắm tại KidsFashion. Đơn hàng của bạn đã được tiếp nhận.</p>
+    </div>
+
+    <!-- ORDER TRACKING -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h6 class="fw-800 mb-4">📍 Trạng Thái Đơn Hàng</h6>
+            <div class="d-flex align-items-start px-2">
+                <div class="step" th:classappend="${order.status.name() == 'PENDING' ? 'step-active' : 'step-done'}">
+                    <div class="step-dot">1</div>
+                    <div class="small fw-700 mt-1 text-center">Chờ xác nhận</div>
+                </div>
+                <div class="step-line mt-4"
+                     th:classappend="${order.status.name() == 'PENDING' ? 'step-inactive' : 'step-done'}"></div>
+                <div class="step" th:classappend="${order.status.name() == 'CONFIRMED' ? 'step-active' :
+                                                   (order.status.name() == 'SHIPPING' || order.status.name() == 'DELIVERED') ? 'step-done' : 'step-inactive'}">
+                    <div class="step-dot">2</div>
+                    <div class="small fw-700 mt-1 text-center">Đã xác nhận</div>
+                </div>
+                <div class="step-line mt-4"
+                     th:classappend="${order.status.name() == 'SHIPPING' || order.status.name() == 'DELIVERED' ? 'step-done' : 'step-inactive'}"></div>
+                <div class="step" th:classappend="${order.status.name() == 'SHIPPING' ? 'step-active' :
+                                                   order.status.name() == 'DELIVERED' ? 'step-done' : 'step-inactive'}">
+                    <div class="step-dot">3</div>
+                    <div class="small fw-700 mt-1 text-center">Đang giao</div>
+                </div>
+                <div class="step-line mt-4"
+                     th:classappend="${order.status.name() == 'DELIVERED' ? 'step-done' : 'step-inactive'}"></div>
+                <div class="step" th:classappend="${order.status.name() == 'DELIVERED' ? 'step-done' : 'step-inactive'}">
+                    <div class="step-dot">✓</div>
+                    <div class="small fw-700 mt-1 text-center">Đã giao</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ORDER ITEMS -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="fw-800 mb-3"><i class="fas fa-box me-2" style="color:var(--primary);"></i>Sản Phẩm Đặt</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead><tr><th>Sản phẩm</th><th class="text-center">SL</th><th class="text-end">Thành tiền</th></tr></thead>
+                            <tbody>
+                            <tr th:each="item : ${order.orderItems}">
+                                <td class="align-middle">
+                                    <div class="fw-700" th:text="${item.productName}">SP</div>
+                                    <div class="small text-muted" th:text="${#numbers.formatDecimal(item.productPrice,0,'COMMA',0,'POINT')} + 'đ'">Giá</div>
+                                </td>
+                                <td class="align-middle text-center fw-700" th:text="${item.quantity}">1</td>
+                                <td class="align-middle text-end fw-800 price-tag"
+                                    th:text="${#numbers.formatDecimal(item.subtotal,0,'COMMA',0,'POINT')} + 'đ'">0đ</td>
+                            </tr>
+                            </tbody>
+                            <tfoot>
+                            <tr th:if="${order.discountAmount != null && order.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                <td colspan="2" class="text-end text-success fw-700">Giảm giá:</td>
+                                <td class="text-end text-success fw-700" th:text="'-' + ${#numbers.formatDecimal(order.discountAmount,0,'COMMA',0,'POINT')} + 'đ'">0đ</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-end fw-800 fs-5" style="color:var(--primary);">TỔNG:</td>
+                                <td class="text-end fw-900 fs-5 price-tag"
+                                    th:text="${#numbers.formatDecimal(order.finalAmount,0,'COMMA',0,'POINT')} + 'đ'">0đ</td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SHIPPING & PAYMENT INFO -->
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="fw-800 mb-3"><i class="fas fa-info-circle me-2" style="color:var(--primary);"></i>Thông Tin Đơn Hàng</h6>
+                    <div class="mb-3">
+                        <div class="small text-muted">Mã đơn hàng</div>
+                        <div class="fw-800" style="color:var(--primary);" th:text="${order.orderCode}">KF123</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Ngày đặt</div>
+                        <div class="fw-700" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Người nhận</div>
+                        <div class="fw-700" th:text="${order.customerName}">Tên</div>
+                        <div class="text-muted small" th:text="${order.customerPhone}">SĐT</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Địa chỉ giao hàng</div>
+                        <div class="fw-700" th:text="${order.shippingAddress}">Địa chỉ</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="small text-muted">Thanh toán</div>
+                        <div class="fw-700" th:text="${order.paymentMethod}">COD</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

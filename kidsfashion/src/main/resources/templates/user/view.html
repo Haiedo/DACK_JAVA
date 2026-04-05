@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="~{fragments/layout :: header_head}"></th:block>
+    <title>Giỏ hàng của bạn - KidsFashion</title>
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<div class="container py-5">
+    <h2 class="mb-4 fw-800">🛒 Giỏ hàng của bác</h2>
+
+    <div th:if="${#lists.isEmpty(cartItems)}" class="text-center py-5">
+        <div style="font-size: 5rem;">🧸</div>
+        <p class="text-muted">Giỏ hàng đang trống rỗng bác ơi!</p>
+        <a href="/shop" class="btn btn-primary rounded-pill px-4">Tiếp tục mua sắm</a>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(cartItems)}" class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <table class="table align-middle mb-0">
+                    <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Sản phẩm</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Tổng</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${cartItems}">
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <img th:src="${item.imageUrl}" class="rounded-3"
+                                     style="width:60px; height:60px; object-fit:cover;"
+                                     onerror="this.src='https://placehold.co/60x60?text=No+Image'"/>
+                                <div class="ms-3">
+                                    <div class="fw-bold" th:text="${item.name}">Tên SP</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                        <td th:text="${item.quantity}">1</td>
+                        <td class="fw-bold text-primary" th:text="${#numbers.formatDecimal(item.getTotalPrice(), 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                        <td class="text-end pe-4">
+                            <a th:href="@{/cart/remove/{id}(id=${item.productId})}" class="text-danger"><i class="fas fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4">
+                <h5 class="fw-bold mb-3">Tóm tắt đơn hàng</h5>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Tạm tính:</span>
+                    <span th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                </div>
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="fw-bold">Tổng cộng:</span>
+                    <span class="fw-bold fs-4 text-primary" th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                </div>
+                <a href="/checkout" class="btn btn-primary w-100 py-3 rounded-pill fw-bold">THANH TOÁN NGAY</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/layout :: footer}"></div>
+</body>
+</html>

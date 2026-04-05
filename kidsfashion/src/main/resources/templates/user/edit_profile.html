@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, 'Cập nhật thông tin', ~{::extraStyles})}">
+<head>
+    <th:block th:fragment="extraStyles">
+        <style>
+            .edit-card { border: none; border-radius: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); background: #fff; }
+            .form-control { border-radius: 12px; padding: 12px 15px; border: 2px solid #f0f0f0; }
+            .form-control:focus { border-color: var(--primary); box-shadow: none; }
+
+            /* Hiệu ứng cho vùng chọn ảnh */
+            .upload-btn-wrapper { position: relative; overflow: hidden; display: inline-block; cursor: pointer; transition: all 0.3s; }
+
+            /* Hover vào nút chọn ảnh */
+            .upload-btn-wrapper:hover .btn-select { background-color: var(--primary); color: white; transform: scale(1.05); }
+            .upload-btn-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+            /* Khu vực xem trước ảnh */
+            .preview-container { width: 120px; height: 120px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 3px solid #f0f0f0; background: #fafafa; display: flex; align-items: center; justify-content: center; }
+            .preview-container img { width: 100%; height: 100%; object-fit: cover; }
+            .preview-container i { font-size: 2.5rem; color: #ddd; }
+        </style>
+    </th:block>
+</head>
+<body>
+<section class="py-5">
+    <div class="container">
+        <div class="edit-card p-4 p-md-5 mx-auto" style="max-width: 600px;">
+            <h3 class="fw-900 text-center mb-4" style="color: var(--primary);">🛠 Cập nhật hồ sơ</h3>
+
+            <form th:action="@{/user/profile/update}" th:object="${user}" method="post" enctype="multipart/form-data">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="mb-4 text-center">
+                    <label class="fw-bold d-block mb-3">Ảnh đại diện</label>
+
+                    <div class="preview-container shadow-sm" id="imagePreview">
+                        <img th:if="${user.avatarUrl}" th:src="${user.avatarUrl}" alt="Preview">
+                        <i th:unless="${user.avatarUrl}" class="fas fa-camera"></i>
+                    </div>
+
+                    <div class="upload-btn-wrapper">
+                        <button class="btn btn-outline-primary rounded-pill px-4 btn-select" type="button">
+                            <i class="fas fa-cloud-upload-alt me-2"></i>Chọn ảnh mới
+                        </button>
+                        <input type="file" name="avatarFile" id="avatarInput" accept="image/*" />
+                    </div>
+                    <div class="mt-2 small text-muted">Bạn hãy chọn ảnh rõ mặt nhé!</div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-muted">Họ và tên</label>
+                    <input type="text" th:field="*{fullName}" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-muted">Số điện thoại</label>
+                    <input type="text" th:field="*{phone}" class="form-control">
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold small text-muted">Địa chỉ chi tiết</label>
+                    <textarea th:field="*{address}" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button type="submit" class="btn btn-primary py-3 rounded-pill fw-800 shadow">
+                        Lưu thay đổi
+                    </button>
+                    <a th:href="@{/user/profile}" class="btn btn-light py-3 rounded-pill fw-bold text-muted">Hủy bỏ</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('avatarInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const previewContainer = document.getElementById('imagePreview');
+                    // Thay thế nội dung bên trong bằng thẻ img mới
+                    previewContainer.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+</section>
+</body>
+</html>

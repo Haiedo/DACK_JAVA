@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, 'Tìm Kiếm', ~{::extraStyles})}">
+<head>
+    <th:block th:fragment="extraStyles">
+        <style>
+            /* CSS RIÊNG CHO TRANG TÌM KIẾM */
+            .search-header { background: #fff0f5; padding: 40px 0; border-radius: 30px; margin-bottom: 40px; }
+            .product-card {
+                border:none; border-radius:20px; overflow:hidden;
+                box-shadow:0 4px 20px rgba(0,0,0,.05); transition:all .3s; height:100%;
+                background: #fff;
+            }
+            .product-card:hover { transform:translateY(-5px); box-shadow:0 8px 30px rgba(255,107,157,.2); }
+            .product-img-wrap {
+                height:220px; display:flex; align-items:center;
+                justify-content:center; position:relative; overflow: hidden;
+            }
+            .product-img-wrap img { width:100%; height:100%; object-fit:cover; transition: 0.5s; }
+            .product-card:hover img { transform: scale(1.1); }
+
+            .price-tag { color:var(--primary); font-weight:800; font-size:1.1rem; }
+            .cart-btn {
+                background:var(--primary); color:#fff; border:none; border-radius:50%;
+                width:38px; height:38px; display:flex; align-items:center;
+                justify-content:center; transition: 0.3s;
+            }
+            .cart-btn:hover { background:var(--primary-dark); transform: rotate(15deg); }
+
+            /* Badge cho sản phẩm mới hoặc hết hàng nếu cần */
+            .badge-new { position: absolute; top: 15px; left: 15px; background: var(--primary); color: #fff; padding: 5px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; z-index: 2; }
+        </style>
+    </th:block>
+</head>
+<body>
+
+<section class="py-5">
+    <div class="container">
+        <div class="search-header text-center shadow-sm">
+            <h2 class="fw-900 mb-2">🔍 Kết Quả Tìm Kiếm</h2>
+            <p class="text-muted mb-0">
+                Tìm thấy <span class="text-primary fw-bold" th:text="${products.totalElements}">0</span>
+                sản phẩm cho từ khóa "<span class="fw-bold" th:text="${keyword}"></span>"
+            </p>
+        </div>
+
+        <div th:if="${products.isEmpty()}" class="text-center py-5">
+            <div style="font-size:6rem;">🧸</div>
+            <h3 class="mt-3 text-muted fw-800">Bạn ơi, không tìm thấy rồi!</h3>
+            <p class="text-muted fs-5">Bạn thử tìm với từ khóa khác như "váy", "áo", "quần" xem sao nhé.</p>
+            <a href="/shop" class="btn btn-primary rounded-pill px-5 py-3 mt-3 fw-bold shadow">
+                XEM TẤT CẢ SẢN PHẨM
+            </a>
+        </div>
+
+        <div class="row g-4" th:unless="${products.isEmpty()}">
+            <div class="col-6 col-md-4 col-lg-3" th:each="product : ${products.content}">
+                <div class="card product-card">
+                    <div class="product-img-wrap">
+                        <a th:href="@{/product/{id}(id=${product.id})}">
+                            <img th:src="${product.imageUrl ?: '/images/default-product.png'}" th:alt="${product.name}"/>
+                        </a>
+                        <span th:if="${product.stockQuantity <= 0}" class="badge bg-secondary position-absolute" style="top:10px; right:10px;">Hết hàng</span>
+                    </div>
+
+                    <div class="card-body p-3">
+                        <small class="text-muted text-uppercase fw-bold" style="font-size: 10px;" th:text="${product.category?.name}">Danh mục</small>
+                        <h6 class="fw-800 mt-1 mb-2 text-truncate" th:text="${product.name}">Tên sản phẩm</h6>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="price-tag" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'"></span>
+                            </div>
+                            <button class="cart-btn shadow-sm" th:onclick="addToCart([[${product.id}]])" title="Thêm vào giỏ">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="mt-5" th:if="${products.totalPages > 1}">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                    <a class="page-link rounded-circle mx-1" th:href="@{/search(keyword=${keyword},page=${currentPage-1})}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                <li th:each="i : ${#numbers.sequence(0, products.totalPages-1)}"
+                    class="page-item" th:classappend="${i == currentPage ? 'active' : ''}">
+                    <a class="page-link rounded-circle mx-1" th:href="@{/search(keyword=${keyword},page=${i})}" th:text="${i+1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage == products.totalPages-1 ? 'disabled' : ''}">
+                    <a class="page-link rounded-circle mx-1" th:href="@{/search(keyword=${keyword},page=${currentPage+1})}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <script th:inline="javascript">
+        function addToCart(productId) {
+            // 1. Lấy mã bảo mật CSRF (Rất quan trọng để không bị lỗi 403)
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+            const token = document.querySelector('meta[name="_csrf"]').content;
+
+            // 2. Gửi yêu cầu thêm vào giỏ
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [header]: token
+                },
+                body: `productId=${productId}&quantity=1`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // 3. Cập nhật số lượng trên Header ngay lập tức
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge) {
+                        badge.textContent = data.cartCount;
+                        badge.classList.remove('d-none');
+                    }
+
+                    // 4. Hiển thị thông báo Toast đẹp mắt
+                    showToast("Thêm vào giỏ hàng thành công!", "success");
+                } else {
+                    showToast("Lỗi: " + data.message, "danger");
+                }
+            })
+            .catch(err => {
+                showToast("Bạn cần đăng nhập để thêm vào giỏ hàng nhé!", "warning");
+            });
+        }
+
+        // Hàm hiển thị thông báo Toast
+        function showToast(message, type) {
+            const toastEl = document.getElementById('cartToast');
+            const toastMsg = document.getElementById('toastMsg');
+
+            // Đổi màu theo loại thông báo (success, danger, warning)
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastMsg.textContent = message;
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    </script>
+</section>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản Lý Người Dùng - KidsFashion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet"/>
+    <style>
+        :root { --primary:#ff6b9d; --sidebar:#2d3436; }
+        body { font-family:'Nunito',sans-serif; background:#f8f9fa; }
+        .sidebar { width:260px; min-height:100vh; background:var(--sidebar); position:fixed; left:0; top:0; z-index:100; }
+        .sidebar-brand { font-family:'Pacifico',cursive; color:var(--primary); font-size:1.5rem; padding:24px 20px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar-item { display:flex; align-items:center; padding:12px 20px; color:rgba(255,255,255,.7); text-decoration:none; font-weight:600; transition:.2s; border-left:3px solid transparent; }
+        .sidebar-item:hover, .sidebar-item.active { color:#fff; background:rgba(255,107,157,.15); border-left-color:var(--primary); }
+        .sidebar-item i { width:24px; }
+        .main-content { margin-left:260px; padding:24px; }
+        .topbar { background:#fff; border-radius:16px; padding:16px 24px; margin-bottom:24px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .card { border:none; border-radius:16px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .form-control { border-radius:10px; padding:10px 16px; border:2px solid #f0d0e0; }
+        .form-control:focus { border-color:var(--primary); box-shadow:0 0 0 .25rem rgba(255,107,157,.15); }
+        .btn-primary { background:var(--primary); border-color:var(--primary); border-radius:10px; font-weight:700; }
+        .table thead th { background:var(--primary); color:#fff; border:none; font-weight:700; padding:14px; }
+        .table tbody tr:hover { background:#fff8fb; }
+        .alert-success { background:#d4f4ea; border-color:#06d6a0; color:#047857; border-radius:12px; }
+        .avatar-circle { width:38px; height:38px; background:linear-gradient(135deg,var(--primary),#ff8fab); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:800; font-size:.9rem; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">🧸 KidsFashion</div>
+    <div class="py-2">
+        <a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="/admin/products" class="sidebar-item"><i class="fas fa-tshirt"></i> Quản lý sản phẩm</a>
+        <a href="/admin/categories" class="sidebar-item"><i class="fas fa-tags"></i> Danh mục</a>
+        <a href="/admin/orders" class="sidebar-item"><i class="fas fa-shopping-bag"></i> Đơn hàng</a>
+        <a href="/admin/users" class="sidebar-item active"><i class="fas fa-users"></i> Người dùng</a>
+        <a href="/admin/discounts" class="sidebar-item"><i class="fas fa-percentage"></i> Mã giảm giá</a>
+        <a href="/admin/statistics" class="sidebar-item"><i class="fas fa-chart-bar"></i> Thống kê</a>
+        <hr style="border-color:rgba(255,255,255,.1);margin:12px 20px;"/>
+        <a href="/" class="sidebar-item"><i class="fas fa-store"></i> Về cửa hàng</a>
+        <a href="/logout" class="sidebar-item" style="color:#ff6b9d;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar"><h5 class="mb-0 fw-800">👥 Quản Lý Người Dùng</h5></div>
+    <div th:if="${success}" class="alert alert-success mb-3"><i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span></div>
+
+    <!-- SEARCH -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="/admin/users" class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label fw-700 small">Tìm kiếm người dùng</label>
+                    <input type="text" class="form-control" name="keyword" th:value="${keyword}" placeholder="Tên đăng nhập, email, họ tên..."/>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i>Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Người dùng</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Vai trò</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đăng ký</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${users.isEmpty()}">
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="fas fa-users fa-3x mb-3 d-block opacity-50"></i>Không tìm thấy người dùng
+                        </td>
+                    </tr>
+                    <tr th:each="u, stat : ${users.content}">
+                        <td class="align-middle text-muted" th:text="${stat.index + 1 + currentPage * 10}">1</td>
+                        <td class="align-middle">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="avatar-circle" th:text="${u.fullName != null ? #strings.substring(u.fullName,0,1) : #strings.substring(u.username,0,1)}">A</div>
+                                <div>
+                                    <div class="fw-700" th:text="${u.fullName ?: u.username}">Họ tên</div>
+                                    <div class="small text-muted" th:text="'@' + ${u.username}">@username</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="align-middle" th:text="${u.email}">email</td>
+                        <td class="align-middle" th:text="${u.phone ?: '—'}">SĐT</td>
+                        <td class="align-middle">
+                            <span th:each="role : ${u.roles}"
+                                  th:class="${role.name == 'ROLE_ADMIN' ? 'badge bg-danger' : 'badge bg-primary'}"
+                                  th:text="${role.name == 'ROLE_ADMIN' ? 'Admin' : 'User'}">Role</span>
+                        </td>
+                        <td class="align-middle">
+                            <span th:if="${u.active}" class="badge" style="background:#d4f4ea;color:#047857;">Hoạt động</span>
+                            <span th:unless="${u.active}" class="badge" style="background:#ffe0e8;color:#c2185b;">Bị khóa</span>
+                        </td>
+                        <td class="align-middle small text-muted"
+                            th:text="${#temporals.format(u.createdAt, 'dd/MM/yyyy')}">01/01/2024</td>
+                        <td class="align-middle">
+                            <form th:action="@{/admin/users/toggle/{id}(id=${u.id})}" method="post" style="display:inline;">
+                                <button type="submit" th:class="${u.active ? 'btn btn-sm btn-outline-warning' : 'btn btn-sm btn-outline-success'}"
+                                        th:title="${u.active ? 'Khóa tài khoản' : 'Mở khóa'}">
+                                    <i th:class="${u.active ? 'fas fa-lock' : 'fas fa-unlock'}"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-top" th:if="${users.totalPages > 1}">
+                <span class="small text-muted">Tổng: <strong th:text="${users.totalElements}">0</strong> người dùng</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(page=${currentPage-1},keyword=${keyword})}">‹</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, users.totalPages-1)}"
+                            class="page-item" th:classappend="${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(page=${i},keyword=${keyword})}" th:text="${i+1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == users.totalPages-1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/users(page=${currentPage+1},keyword=${keyword})}">›</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

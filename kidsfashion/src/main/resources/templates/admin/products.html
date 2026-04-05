@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Quản Lý Sản Phẩm - KidsFashion Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet"/>
+    <style>
+        :root { --primary:#ff6b9d; --sidebar:#2d3436; }
+        body { font-family:'Nunito',sans-serif; background:#f8f9fa; }
+        .sidebar { width:260px; min-height:100vh; background:var(--sidebar); position:fixed; left:0; top:0; z-index:100; }
+        .sidebar-brand { font-family:'Pacifico',cursive; color:var(--primary); font-size:1.5rem; padding:24px 20px; border-bottom:1px solid rgba(255,255,255,.1); }
+        .sidebar-item { display:flex; align-items:center; padding:12px 20px; color:rgba(255,255,255,.7); text-decoration:none; font-weight:600; transition:.2s; border-left:3px solid transparent; }
+        .sidebar-item:hover, .sidebar-item.active { color:#fff; background:rgba(255,107,157,.15); border-left-color:var(--primary); }
+        .sidebar-item i { width:24px; }
+        .main-content { margin-left:260px; padding:24px; }
+        .topbar { background:#fff; border-radius:16px; padding:16px 24px; margin-bottom:24px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .card { border:none; border-radius:16px; box-shadow:0 2px 15px rgba(0,0,0,.06); }
+        .table thead th { background:var(--primary); color:#fff; border:none; font-weight:700; padding:14px; }
+        .table tbody tr:hover { background:#fff8fb; }
+        .btn-primary { background:var(--primary); border-color:var(--primary); border-radius:10px; }
+        .btn-primary:hover { background:#e05587; border-color:#e05587; }
+        .product-img-sm { width:50px; height:50px; object-fit:cover; border-radius:10px; background:#fff0f5; }
+        .alert-success { background:#d4f4ea; border-color:#06d6a0; color:#047857; border-radius:12px; }
+        .alert-danger { background:#ffe0e8; border-color:#ff6b9d; color:#c2185b; border-radius:12px; }
+        .badge-active { background:#d4f4ea; color:#047857; border-radius:8px; padding:4px 10px; font-weight:700; }
+        .badge-inactive { background:#ffe0e8; color:#c2185b; border-radius:8px; padding:4px 10px; font-weight:700; }
+    </style>
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">🧸 KidsFashion</div>
+    <div class="py-2">
+        <a href="/admin/dashboard" class="sidebar-item"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="/admin/products" class="sidebar-item active"><i class="fas fa-tshirt"></i> Quản lý sản phẩm</a>
+        <a href="/admin/categories" class="sidebar-item"><i class="fas fa-tags"></i> Danh mục</a>
+        <a href="/admin/orders" class="sidebar-item"><i class="fas fa-shopping-bag"></i> Đơn hàng</a>
+        <a href="/admin/users" class="sidebar-item"><i class="fas fa-users"></i> Người dùng</a>
+        <a href="/admin/discounts" class="sidebar-item"><i class="fas fa-percentage"></i> Mã giảm giá</a>
+        <a href="/admin/statistics" class="sidebar-item"><i class="fas fa-chart-bar"></i> Thống kê</a>
+        <hr style="border-color:rgba(255,255,255,.1);margin:12px 20px;"/>
+        <a href="/" class="sidebar-item"><i class="fas fa-store"></i> Về cửa hàng</a>
+        <a href="/logout" class="sidebar-item" style="color:#ff6b9d;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="topbar d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-800">👕 Quản Lý Sản Phẩm</h5>
+        <a href="/admin/products/new" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Thêm Sản Phẩm
+        </a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success mb-3"><i class="fas fa-check-circle me-2"></i><span th:text="${success}"></span></div>
+    <div th:if="${error}" class="alert alert-danger mb-3"><i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span></div>
+
+    <!-- SEARCH FILTER -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="/admin/products" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-700 small">Tìm theo tên</label>
+                    <input type="text" class="form-control" name="name" th:value="${searchName}" placeholder="Nhập tên sản phẩm..."/>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-700 small">Danh mục</label>
+                    <select class="form-select" name="categoryId">
+                        <option value="">-- Tất cả danh mục --</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}"
+                                th:text="${cat.name}"
+                                th:selected="${searchCategory != null && searchCategory == cat.id}">Danh mục</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100"><i class="fas fa-search me-2"></i>Tìm kiếm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Giá</th>
+                        <th>Tồn kho</th>
+                        <th>Đã bán</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${products.isEmpty()}">
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <i class="fas fa-box-open fa-3x mb-3 d-block opacity-50"></i>
+                            Chưa có sản phẩm nào
+                        </td>
+                    </tr>
+                    <tr th:each="p, stat : ${products.content}">
+                        <td class="align-middle text-muted small" th:text="${stat.index + 1 + currentPage * 10}">1</td>
+                        <td class="align-middle">
+                            <img th:if="${p.imageUrl}" th:src="${p.imageUrl}" class="product-img-sm" th:alt="${p.name}"/>
+                            <div th:unless="${p.imageUrl}" class="product-img-sm d-flex align-items-center justify-content-center" style="font-size:1.5rem;">👚</div>
+                        </td>
+                        <td class="align-middle">
+                            <div class="fw-700" th:text="${p.name}">Tên SP</div>
+                            <div class="small text-muted" th:text="${p.ageRange}">Độ tuổi</div>
+                        </td>
+                        <td class="align-middle">
+                            <span class="badge" style="background:#fff0f5;color:var(--primary);font-weight:700;" th:text="${p.category?.name ?: 'Chưa phân loại'}">Danh mục</span>
+                        </td>
+                        <td class="align-middle">
+                            <div class="fw-700" style="color:var(--primary);" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+                            <div class="small text-decoration-line-through text-muted" th:if="${p.originalPrice != null}" th:text="${#numbers.formatDecimal(p.originalPrice,0,'COMMA',0,'POINT')} + 'đ'"></div>
+                        </td>
+                        <td class="align-middle">
+                            <span th:class="${p.stockQuantity < 5 ? 'badge bg-danger' : 'badge bg-success'}" th:text="${p.stockQuantity}">0</span>
+                        </td>
+                        <td class="align-middle fw-700" th:text="${p.soldCount}">0</td>
+                        <td class="align-middle">
+                            <span th:class="${p.active ? 'badge-active' : 'badge-inactive'}" th:text="${p.active ? 'Đang bán' : 'Ẩn'}">Đang bán</span>
+                        </td>
+                        <td class="align-middle">
+                            <div class="d-flex gap-1">
+                                <a th:href="@{/admin/products/edit/{id}(id=${p.id})}" class="btn btn-sm btn-outline-primary" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form th:action="@{/admin/products/delete/{id}(id=${p.id})}" method="post" style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-top" th:if="${products.totalPages > 1}">
+                <span class="small text-muted">
+                    Hiển thị <strong th:text="${products.numberOfElements}">0</strong> /
+                    <strong th:text="${products.totalElements}">0</strong> sản phẩm
+                </span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/products(page=${currentPage - 1}, name=${searchName}, categoryId=${searchCategory})}">‹</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, products.totalPages - 1)}"
+                            th:classappend="${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/admin/products(page=${i}, name=${searchName}, categoryId=${searchCategory})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == products.totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/products(page=${currentPage + 1}, name=${searchName}, categoryId=${searchCategory})}">›</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

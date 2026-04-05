@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, '500 - Lỗi hệ thống', ~{::style})}">
+<head>
+    <style>
+        .error-code { font-size: 8rem; font-weight: 900; color: #ff4757; margin-bottom: 20px; }
+        .error-container { padding: 100px 0; text-align: center; }
+        .wrench-icon { font-size: 5rem; color: #f1c40f; animation: rotate 3s linear infinite; display: inline-block; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+<section class="error-container container">
+    <div class="wrench-icon"><i class="fas fa-tools"></i></div>
+    <div class="error-code">500</div>
+    <h2 class="fw-800 mb-3">Hệ thống đang bận một chút!</h2>
+    <p class="text-muted fs-5 mb-4">Có vẻ như máy chủ đang được bảo trì hoặc gặp lỗi kỹ thuật nhỏ. Bạn vui lòng quay lại sau ít phút nhé.</p>
+    <a href="javascript:location.reload()" class="btn btn-danger rounded-pill px-5 py-3 fw-bold shadow">
+        <i class="fas fa-sync-alt me-2"></i>Thử Tải Lại Trang
+    </a>
+</section>
+</body>
+</html>

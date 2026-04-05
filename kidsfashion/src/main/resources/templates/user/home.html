@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, 'Trang Chủ', ~{::extraStyles})}">
+<head>
+    <th:block th:fragment="extraStyles">
+        <style>
+            /* GIỮ NGUYÊN CSS RIÊNG CỦA TRANG HOME BÁC GỬI */
+            .hero { background:linear-gradient(135deg,#fff0f5 0%,#ffe8f0 50%,#fff5e0 100%); padding:80px 0; }
+            .hero h1 { font-size:3.5rem; font-weight:900; color:#2d3436; }
+            .hero h1 span { color:var(--primary); }
+            .btn-primary { background:var(--primary); border-color:var(--primary); border-radius:50px; padding:12px 30px; font-weight:700; }
+            .btn-primary:hover { background:var(--primary-dark); border-color:var(--primary-dark); }
+
+            .carousel-main { border-radius: 25px; overflow: hidden; box-shadow: 0 10px 30px rgba(255,107,157,0.1); margin-bottom: 30px; }
+            .carousel-main img { height: 420px; object-fit: cover; }
+            .service-box { position: relative; border-radius: 20px; overflow: hidden; height: 260px; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
+            .service-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
+            .service-box:hover img { transform: scale(1.1); }
+            .service-box-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 20px; color: white; }
+            .service-box-title { font-weight: 800; font-size: 1.3rem; margin-bottom: 5px; }
+            .service-box-line { width: 40px; height: 3px; background: var(--primary); border-radius: 2px; }
+
+            .product-card { border:none; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.08); transition:all .3s; height:100%; }
+            .product-card:hover { transform:translateY(-8px); box-shadow:0 12px 35px rgba(255,107,157,.25); }
+            .product-img-wrap { position:relative; overflow:hidden; background:#fff0f5; height:230px; display:flex; align-items:center; justify-content:center; }
+            .product-img-wrap img { width:100%; height:100%; object-fit:cover; }
+            .discount-badge { position:absolute; top:12px; left:12px; background:var(--primary); color:#fff; border-radius:10px; padding:3px 10px; font-size:.75rem; font-weight:800; }
+            .price-tag { color:var(--primary); font-weight:800; font-size:1.15rem; }
+            .cart-btn { background:var(--primary); color:#fff; border:none; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; transition:.2s; }
+            .cart-btn:hover { background:var(--primary-dark); transform:scale(1.1); }
+            .custom-slider-section { padding: 40px 0; background: #fff; }
+        </style>
+    </th:block>
+</head>
+<body>
+
+<section>
+    <div class="hero">
+        <div class="container text-center text-lg-start">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <p class="text-muted fw-bold mb-2">✨ Bộ sưu tập mới nhất 2026</p>
+                    <h1>Thời Trang <span>Trẻ Em</span><br/>Xinh Xắn & Thoải Mái</h1>
+                    <p class="lead text-muted mt-3">Khám phá hàng trăm mẫu quần áo đẹp cho bé yêu!</p>
+                    <a href="/shop" class="btn btn-primary btn-lg mt-4">Mua Sắm Ngay</a>
+                </div>
+                <div class="col-lg-6 text-center d-none d-lg-block" style="font-size:12rem;">👗</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-slider-section">
+        <div class="container">
+            <div id="newHeroCarousel" class="carousel slide carousel-main" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active"><img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000" class="d-block w-100"></div>
+                    <div class="carousel-item"><img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=2000" class="d-block w-100"></div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="service-box shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?q=80&w=800">
+                        <div class="service-box-overlay"><h4 class="service-box-title">Chuyện Của Bé</h4><div class="service-box-line"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="service-box shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1444858291040-58f756a3bdd6?q=80&w=800">
+                        <div class="service-box-overlay"><h4 class="service-box-title">Giới thiệu</h4><div class="service-box-line"></div></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="service-box shadow-sm">
+                        <img src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?q=80&w=800">
+                        <div class="service-box-overlay"><h4 class="service-box-title">Liên hệ</h4><div class="service-box-line"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="py-5" style="background:#fff8fb;">
+        <div class="container">
+            <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
+            <div class="row g-4 mt-2">
+                <div class="col-6 col-md-4 col-lg-3" th:each="p : ${featuredProducts}">
+                    <div class="card product-card">
+                        <a th:href="@{/product/{id}(id=${p.id})}">
+                            <div class="product-img-wrap">
+                                <img th:src="${p.imageUrl ?: '/images/default.png'}">
+                                <span th:if="${p.discountPercent > 0}" class="discount-badge" th:text="'-' + ${p.discountPercent} + '%'"></span>
+                            </div>
+                        </a>
+                        <div class="card-body text-center">
+                            <h6 class="fw-bold text-truncate" th:text="${p.name}">Tên SP</h6>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="price-tag" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + 'đ'"></span>
+                                <button type="button" class="cart-btn" th:onclick="|addToCart('${p.id}')|"><i class="fas fa-cart-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        function addToCart(productId) {
+            // 1. Lấy mã bảo mật CSRF (Rất quan trọng để không bị lỗi 403)
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+            const token = document.querySelector('meta[name="_csrf"]').content;
+
+            // 2. Gửi yêu cầu thêm vào giỏ
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [header]: token
+                },
+                body: `productId=${productId}&quantity=1`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // 3. Cập nhật số lượng trên Header ngay lập tức
+                    const badge = document.querySelector('.cart-badge'); // Tên class bác đặt ở Header
+                    if (badge) {
+                        badge.textContent = data.cartCount;
+                        badge.classList.remove('d-none');
+                    }
+
+                    // 4. Hiển thị thông báo Toast đẹp mắt
+                    showToast("Thêm vào giỏ hàng thành công!", "success");
+                } else {
+                    showToast("Lỗi: " + data.message, "danger");
+                }
+            })
+            .catch(err => {
+                showToast("Bạn cần đăng nhập để thêm vào giỏ hàng nhé!", "warning");
+            });
+        }
+
+        // Hàm hiển thị thông báo Toast
+        function showToast(message, type) {
+            const toastEl = document.getElementById('cartToast');
+            const toastMsg = document.getElementById('toastMsg');
+
+            // Đổi màu theo loại thông báo (success, danger, warning)
+            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+            toastMsg.textContent = message;
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+    </script>
+</section>
+
+</body>
+</html>

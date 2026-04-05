@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, '404 - Không tìm thấy', ~{::style})}">
+<head>
+    <style>
+        .error-code { font-size: 10rem; font-weight: 900; color: var(--primary); line-height: 1; margin-bottom: 20px; text-shadow: 10px 10px 0px #fff0f5; }
+        .error-container { padding: 100px 0; text-align: center; }
+        .toy-img { font-size: 5rem; animation: bounce 2s infinite; display: inline-block; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    </style>
+</head>
+<body>
+<section class="error-container container">
+    <div class="toy-img">🧸</div>
+    <div class="error-code">404</div>
+    <h2 class="fw-800 mb-3">Ôi hỏng rồi bạn ơi!</h2>
+    <p class="text-muted fs-5 mb-5">Trang bác tìm hiện không có ở KidsFashion hoặc đã bị các bé giấu đi mất rồi.</p>
+    <div class="d-flex justify-content-center gap-3">
+        <a href="/" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow">Về Trang Chủ</a>
+        <a href="/shop" class="btn btn-outline-primary rounded-pill px-5 py-3 fw-bold">Xem Cửa Hàng</a>
+    </div>
+</section>
+</body>
+</html>
