@@ -8,11 +8,11 @@
 <div th:replace="~{fragments/layout :: navbar}"></div>
 
 <div class="container py-5">
-    <h2 class="mb-4 fw-800">🛒 Giỏ hàng của bác</h2>
+    <h2 class="mb-4 fw-800">🛒 Giỏ hàng của bạn</h2>
 
     <div th:if="${#lists.isEmpty(cartItems)}" class="text-center py-5">
         <div style="font-size: 5rem;">🧸</div>
-        <p class="text-muted">Giỏ hàng đang trống rỗng bác ơi!</p>
+        <p class="text-muted">Giỏ hàng đang trống rỗng bạn ơi!</p>
         <a href="/shop" class="btn btn-primary rounded-pill px-4">Tiếp tục mua sắm</a>
     </div>
 
@@ -33,19 +33,22 @@
                     <tr th:each="item : ${cartItems}">
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
-                                <img th:src="${item.imageUrl}" class="rounded-3"
-                                     style="width:60px; height:60px; object-fit:cover;"
-                                     onerror="this.src='https://placehold.co/60x60?text=No+Image'"/>
+                                <img th:src="${item.product.imageUrl ?: '/images/default.png'}"
+                                     class="rounded-3"
+                                     style="width:60px; height:60px; object-fit:cover;"/>
                                 <div class="ms-3">
-                                    <div class="fw-bold" th:text="${item.name}">Tên SP</div>
+                                    <div class="fw-bold" th:text="${item.product.name}">Tên SP</div>
                                 </div>
                             </div>
                         </td>
-                        <td th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                        <td th:text="${#numbers.formatDecimal(item.product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
                         <td th:text="${item.quantity}">1</td>
-                        <td class="fw-bold text-primary" th:text="${#numbers.formatDecimal(item.getTotalPrice(), 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
+                        <td class="fw-bold text-primary"
+                            th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</td>
                         <td class="text-end pe-4">
-                            <a th:href="@{/cart/remove/{id}(id=${item.productId})}" class="text-danger"><i class="fas fa-trash"></i></a>
+                            <a th:href="@{/cart/remove/{id}(id=${item.id})}" class="text-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     </tbody>

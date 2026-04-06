@@ -1,196 +1,267 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, ${product.name}, ~{::extraStyles})}">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title th:text="${product.name} + ' - KidsFashion'">Sản phẩm</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Pacifico&display=swap" rel="stylesheet"/>
-    <style>
-        :root { --primary:#ff6b9d; }
-        body { font-family:'Nunito',sans-serif; }
-        .navbar-brand { font-family:'Pacifico',cursive; color:var(--primary)!important; font-size:1.8rem; }
-        .navbar { background:#fff!important; box-shadow:0 2px 15px rgba(255,107,157,.15); }
-        .btn-primary { background:var(--primary); border-color:var(--primary); border-radius:50px; font-weight:700; padding:12px 30px; }
-        .btn-primary:hover { background:#e05587; border-color:#e05587; }
-        .product-main-img { width:100%; border-radius:20px; object-fit:cover; max-height:450px; background:#fff0f5; }
-        .price-tag { color:var(--primary); font-weight:900; font-size:2rem; }
-        .price-original { text-decoration:line-through; color:#aaa; font-size:1.2rem; }
-        .discount-badge { background:var(--primary); color:#fff; border-radius:10px; padding:4px 14px; font-weight:800; font-size:1rem; }
-        .qty-btn { width:40px; height:40px; border-radius:50%; border:2px solid #f0d0e0; background:#fff; font-weight:800; font-size:1.2rem; cursor:pointer; transition:.2s; }
-        .qty-btn:hover { background:var(--primary); color:#fff; border-color:var(--primary); }
-        .badge-cart { background:var(--primary); position:absolute; top:-8px; right:-8px; border-radius:50%; padding:2px 6px; font-size:11px; color:#fff; }
-        .related-card { border:none; border-radius:16px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.08); transition:.3s; }
-        .related-card:hover { transform:translateY(-4px); }
-        .related-img { height:180px; object-fit:cover; background:#fff0f5; }
-        .info-chip { background:#fff0f5; color:var(--primary); border-radius:50px; padding:6px 16px; font-weight:700; font-size:.85rem; }
-    </style>
+    <th:block th:fragment="extraStyles">
+        <style>
+            /* CSS riêng cho trang Chi tiết sản phẩm */
+            .product-detail-container { padding: 60px 0; background: #fff; }
+            .breadcrumb-item a { color: var(--primary); text-decoration: none; font-weight: 600; }
+
+            .product-main-img-wrap {
+                border-radius: 25px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(255,107,157,0.1);
+                background: #fff0f5;
+                position: relative;
+            }
+            .product-main-img { width: 100%; height: auto; object-fit: cover; max-height: 550px; }
+
+            .price-tag-detail { color: var(--primary); font-weight: 900; font-size: 2.5rem; line-height: 1; }
+            .price-original-detail { text-decoration: line-through; color: #adb5bd; font-size: 1.2rem; }
+
+            .info-chip-detail {
+                background: #fff0f5;
+                color: var(--primary);
+                border-radius: 50px;
+                padding: 8px 20px;
+                font-weight: 700;
+                font-size: 0.9rem;
+                display: inline-flex;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .qty-input-group {
+                display: flex;
+                align-items: center;
+                background: #f8f9fa;
+                border-radius: 50px;
+                padding: 5px;
+                width: fit-content;
+                border: 1px solid #eee;
+            }
+            .qty-btn-detail {
+                width: 45px;
+                height: 45px;
+                border-radius: 50%;
+                border: none;
+                background: white;
+                color: var(--primary);
+                font-weight: 900;
+                font-size: 1.2rem;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+                transition: 0.2s;
+            }
+            .qty-btn-detail:hover { background: var(--primary); color: white; }
+            #qtyDisplay { width: 50px; text-align: center; font-weight: 800; font-size: 1.1rem; }
+
+            .btn-add-to-cart {
+                background: var(--primary);
+                border: none;
+                border-radius: 50px;
+                padding: 15px 40px;
+                font-weight: 800;
+                color: white;
+                transition: 0.3s;
+                box-shadow: 0 5px 15px rgba(255,107,157,0.3);
+            }
+            .btn-add-to-cart:hover {
+                background: var(--primary-dark);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(255,107,157,0.4);
+            }
+
+            .related-section { background: #fff8fb; padding: 60px 0; }
+        </style>
+    </th:block>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container">
-        <a class="navbar-brand" href="/">🧸 KidsFashion</a>
-        <div class="ms-auto d-flex gap-2">
-            <form action="/search" method="get" class="d-flex me-2">
-                <div class="input-group">
-                    <input class="form-control" type="search" name="keyword" placeholder="Tìm sản phẩm..."/>
-                    <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+
+<section>
+    <div class="product-detail-container">
+        <div class="container">
+            <nav aria-label="breadcrumb" class="mb-5">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+                    <li class="breadcrumb-item"><a href="/shop">Cửa hàng</a></li>
+                    <li class="breadcrumb-item active" th:text="${product.name}">Sản phẩm</li>
+                </ol>
+            </nav>
+
+            <div class="row g-5">
+                <div class="col-lg-5">
+                    <div class="product-main-img-wrap">
+                        <img th:src="${product.imageUrl ?: '/images/default.png'}"
+                             class="product-main-img" th:alt="${product.name}">
+                        <span th:if="${product.discountPercent > 0}"
+                              class="discount-badge" style="font-size: 1rem; padding: 5px 15px;"
+                              th:text="'-' + ${product.discountPercent} + '%'"></span>
+                    </div>
                 </div>
-            </form>
-            <a href="/cart" class="btn btn-outline-danger rounded-pill position-relative">
-                <i class="fas fa-shopping-cart"></i>
-                <span class="badge-cart" id="cartCount">0</span>
-            </a>
-            <div sec:authorize="isAuthenticated()" class="dropdown">
-                <button class="btn btn-light dropdown-toggle rounded-pill" data-bs-toggle="dropdown">
-                    <i class="fas fa-user-circle" style="color:var(--primary)"></i>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" href="/admin/dashboard">Quản Trị</a></li>
-                    <li><a class="dropdown-item" href="/orders">Đơn Hàng</a></li>
-                    <li><a class="dropdown-item text-danger" href="/logout">Đăng Xuất</a></li>
-                </ul>
-            </div>
-            <div sec:authorize="!isAuthenticated()">
-                <a href="/login" class="btn btn-outline-primary rounded-pill">Đăng Nhập</a>
-            </div>
-        </div>
-    </div>
-</nav>
 
-<div class="container py-5">
-    <!-- BREADCRUMB -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/" class="text-decoration-none" style="color:var(--primary);">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a href="/shop" class="text-decoration-none" style="color:var(--primary);">Cửa hàng</a></li>
-            <li class="breadcrumb-item active" th:text="${product.name}">Sản phẩm</li>
-        </ol>
-    </nav>
+                <div class="col-lg-7">
+                    <span class="text-uppercase text-muted fw-bold mb-2 d-block"
+                          style="letter-spacing: 1px;" th:text="${product.category?.name}">DANH MỤC</span>
+                    <h1 class="display-5 fw-900 mb-3" th:text="${product.name}">Tên sản phẩm</h1>
 
-    <div class="row g-5">
-        <!-- PRODUCT IMAGE -->
-        <div class="col-md-5">
-            <div class="position-relative">
-                <img th:if="${product.imageUrl}" th:src="${product.imageUrl}" class="product-main-img w-100" th:alt="${product.name}"/>
-                <div th:unless="${product.imageUrl}" class="product-main-img d-flex align-items-center justify-content-center"
-                     style="height:400px;background:#fff0f5;border-radius:20px;font-size:8rem;">👗</div>
-                <span th:if="${product.discountPercent > 0}" class="discount-badge position-absolute"
-                      style="top:16px;left:16px;" th:text="'-' + ${product.discountPercent} + '%'">-20%</span>
-            </div>
-        </div>
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="price-tag-detail"
+                              th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                        <span class="price-original-detail" th:if="${product.originalPrice != null}"
+                              th:text="${#numbers.formatDecimal(product.originalPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                    </div>
 
-        <!-- PRODUCT INFO -->
-        <div class="col-md-7">
-            <div class="small text-muted mb-1" th:text="${product.category?.name}">Danh mục</div>
-            <h2 class="fw-800 mb-3" th:text="${product.name}">Tên sản phẩm</h2>
-
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <span class="price-tag" th:text="${#numbers.formatDecimal(product.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
-                <span class="price-original" th:if="${product.originalPrice != null}"
-                      th:text="${#numbers.formatDecimal(product.originalPrice,0,'COMMA',0,'POINT')} + 'đ'">0đ</span>
-            </div>
-
-            <!-- INFO CHIPS -->
-            <div class="d-flex flex-wrap gap-2 mb-4">
-                <span class="info-chip" th:if="${product.ageRange}"><i class="fas fa-child me-1"></i><span th:text="${product.ageRange}">Độ tuổi</span></span>
-                <span class="info-chip" th:if="${product.size}"><i class="fas fa-ruler me-1"></i><span th:text="${product.size}">Size</span></span>
-                <span class="info-chip" th:if="${product.color}"><i class="fas fa-palette me-1"></i><span th:text="${product.color}">Màu sắc</span></span>
-                <span class="info-chip">
-                    <i class="fas fa-box me-1"></i>
-                    Còn <span th:text="${product.stockQuantity}">0</span> sản phẩm
-                </span>
-                <span class="info-chip">
-                    <i class="fas fa-fire me-1"></i>
-                    Đã bán <span th:text="${product.soldCount}">0</span>
-                </span>
-            </div>
-
-            <!-- DESCRIPTION -->
-            <div class="mb-4" th:if="${product.description}">
-                <h6 class="fw-700">Mô tả sản phẩm:</h6>
-                <p class="text-muted" th:text="${product.description}">Mô tả</p>
-            </div>
-
-            <!-- ADD TO CART -->
-            <div class="d-flex align-items-center gap-3 mb-4">
-                <div class="d-flex align-items-center gap-2">
-                    <button class="qty-btn" onclick="changeQty(-1)">−</button>
-                    <span class="fw-800 px-3 fs-5" id="qtyDisplay">1</span>
-                    <button class="qty-btn" onclick="changeQty(1)">+</button>
-                </div>
-                <button class="btn btn-primary flex-grow-1" onclick="addToCartDetail([[${product.id}]])">
-                    <i class="fas fa-cart-plus me-2"></i>Thêm Vào Giỏ Hàng
-                </button>
-            </div>
-
-            <div id="cartMsg" class="alert" style="display:none;border-radius:12px;"></div>
-
-            <div class="d-flex gap-3 text-muted small mt-3">
-                <span><i class="fas fa-truck me-1 text-success"></i>Giao hàng miễn phí</span>
-                <span><i class="fas fa-undo me-1 text-primary"></i>Đổi trả 7 ngày</span>
-                <span><i class="fas fa-shield-alt me-1 text-warning"></i>Chất lượng đảm bảo</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- RELATED PRODUCTS -->
-    <div th:if="${not #lists.isEmpty(relatedProducts)}" class="mt-5">
-        <h4 class="fw-800 mb-4">Sản Phẩm Liên Quan</h4>
-        <div class="row g-4">
-            <div class="col-6 col-md-3" th:each="p : ${relatedProducts}" th:if="${p.id != product.id}">
-                <a th:href="@{/product/{id}(id=${p.id})}" class="text-decoration-none">
-                    <div class="card related-card">
-                        <img th:if="${p.imageUrl}" th:src="${p.imageUrl}" class="related-img w-100" th:alt="${p.name}"/>
-                        <div th:unless="${p.imageUrl}" class="related-img d-flex align-items-center justify-content-center" style="font-size:4rem;">👚</div>
-                        <div class="card-body">
-                            <h6 class="fw-700 small mb-1" th:text="${p.name}">SP</h6>
-                            <div class="fw-800" style="color:var(--primary);" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + 'đ'">0đ</div>
+                    <div class="mb-4">
+                        <div class="info-chip-detail me-2" th:if="${product.size}">
+                            <i class="fas fa-ruler-combined me-2"></i> Size: [[${product.size}]]
+                        </div>
+                        <div class="info-chip-detail me-2">
+                            <i class="fas fa-box-open me-2"></i> Kho: [[${product.stockQuantity}]]
+                        </div>
+                        <div class="info-chip-detail me-2" th:if="${product.ageRange}">
+                            <i class="fas fa-child me-2"></i> [[${product.ageRange}]]
                         </div>
                     </div>
-                </a>
+
+                    <p class="text-muted mb-5 lead" th:text="${product.description}">Mô tả ngắn về sản phẩm...</p>
+
+                    <div class="d-flex flex-wrap align-items-center gap-4 mb-5">
+                        <div class="qty-input-group">
+                            <button class="qty-btn-detail" onclick="changeQuantity(-1)">−</button>
+                            <span id="qtyDisplay">1</span>
+                            <button class="qty-btn-detail" onclick="changeQuantity(1)">+</button>
+                        </div>
+
+                        <button class="btn-add-to-cart" th:onclick="|handleAddToCartDetail('${product.id}')|">
+                            <i class="fas fa-cart-plus me-2"></i> THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+
+                    <div class="pt-4 border-top">
+                        <div class="d-flex gap-4 text-muted small">
+                            <span><i class="fas fa-truck-moving me-2 text-success"></i> Ship COD toàn quốc</span>
+                            <span><i class="fas fa-sync-alt me-2 text-primary"></i> Đổi trả trong 7 ngày</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    let qty = 1;
-    const maxStock = [[${product.stockQuantity}]];
+    <div class="related-section" th:if="${not #lists.isEmpty(relatedProducts)}">
+        <div class="container">
+            <h3 class="fw-900 mb-4">Sản Phẩm Tương Tự</h3>
+            <div class="row g-4">
+                <div class="col-6 col-md-4 col-lg-3" th:each="p : ${relatedProducts}" th:if="${p.id != product.id}">
+                    <a th:href="@{/product/{id}(id=${p.id})}" class="text-decoration-none">
+                        <div class="card product-card h-100 border-0 shadow-sm" style="border-radius: 20px; overflow: hidden; transition: 0.3s;">
+                            <div class="product-img-wrap" style="height: 200px; background: #fff0f5; display: flex; align-items: center; justify-content: center;">
+                                <img th:src="${p.imageUrl ?: '/images/default.png'}" style="width: 100%; height: 100%; object-fit: cover;">
+                            </div>
+                            <div class="card-body text-center">
+                                <h6 class="fw-bold text-truncate text-dark" th:text="${p.name}">SP Liên Quan</h6>
+                                <div class="price-tag mt-2" style="color: var(--primary); font-weight: 800;"
+                                     th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + 'đ'"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    function changeQty(delta) {
-        qty = Math.max(1, Math.min(maxStock, qty + delta));
-        document.getElementById('qtyDisplay').textContent = qty;
-    }
+    <script th:inline="javascript">
+        let currentQty = 1;
+        const maxStock = [[${product.stockQuantity}]];
 
-    function addToCartDetail(productId) {
-        fetch('/api/cart/add', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: `productId=${productId}&quantity=${qty}`
-        })
-        .then(r => r.json())
-        .then(d => {
-            const msg = document.getElementById('cartMsg');
-            msg.style.display = 'block';
-            if (d.success) {
-                document.getElementById('cartCount').textContent = d.cartCount;
-                msg.className = 'alert alert-success';
-                msg.innerHTML = `<i class="fas fa-check-circle me-2"></i>${d.message}`;
-            } else {
-                msg.className = 'alert alert-danger';
-                msg.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i>${d.message}`;
+        // Hàm thay đổi số lượng (+/-)
+        function changeQuantity(delta) {
+            currentQty = Math.max(1, Math.min(maxStock, currentQty + delta));
+            const display = document.getElementById('qtyDisplay');
+            if (display) display.textContent = currentQty;
+        }
+
+        // Hàm xử lý thêm vào giỏ hàng
+        function handleAddToCartDetail(productId) {
+            // 1. Lấy CSRF token bảo mật
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+
+            if (!csrfHeader || !csrfToken) {
+                showNotification("Lỗi hệ thống: Thiếu mã bảo mật CSRF!", "danger");
+                return;
             }
-            setTimeout(() => msg.style.display = 'none', 3000);
-        });
-    }
 
-    fetch('/api/cart/count').then(r=>r.json()).then(d=>{
-        document.getElementById('cartCount').textContent=d.count||0;
-    }).catch(()=>{});
-</script>
+            // 2. Gửi yêu cầu Fetch
+            fetch('/api/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader.content]: csrfToken.content
+                },
+                body: `productId=${productId}&quantity=${currentQty}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // 3. Cập nhật Badge trên Header (Thử cả 2 class cho chắc)
+                    const badge = document.querySelector('.badge-cart') || document.querySelector('.cart-badge');
+                    if (badge) {
+                        badge.textContent = data.cartCount;
+                        badge.classList.remove('d-none');
+                    }
+                    // GỌI HÀM THÔNG BÁO MỚI
+                    showNotification(`Đã thêm ${currentQty} sản phẩm vào giỏ hàng!`, "success");
+                } else {
+                    showNotification("Lỗi: " + data.message, "danger");
+                }
+            })
+            .catch(err => {
+                showNotification("Bạn cần đăng nhập để mua sắm!", "warning");
+            });
+        }
+
+        // HÀM HIỂN THỊ THÔNG BÁO TỰ TẠO (Đồng bộ theo yêu cầu của bác)
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? '#2ecc71' : (type === 'danger' ? '#e74c3c' : '#f1c40f');
+
+            toast.className = 'custom-toast p-3 text-white position-fixed shadow-lg';
+            toast.style.cssText = `
+                top:120px;
+                right:20px;
+                z-index:9999;
+                border-radius:15px;
+                background:${bgColor};
+                font-weight:700;
+                min-width: 250px;
+                transition: all 0.5s ease;
+                transform: translateX(120%);
+            `;
+
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2 fs-5"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Hiệu ứng trượt vào
+            setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 100);
+
+            // Tự động biến mất
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(120%)';
+                setTimeout(() => toast.remove(), 500);
+            }, 2500);
+        }
+    </script>
+</section>
+
 </body>
 </html>

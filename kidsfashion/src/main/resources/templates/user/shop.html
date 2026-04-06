@@ -65,7 +65,7 @@
             <div class="card product-card">
                 <a th:href="@{/product/{id}(id=${product.id})}">
                     <div class="product-img-wrap">
-                        <img th:src="${product.imageUrl ?: '/images/default-product.png'}" th:alt="${product.name}"/>
+                        <img th:src="${product.imageUrl}" th:alt="${product.name}"/>
                         <span th:if="${product.discountPercent > 0}" class="badge bg-danger position-absolute"
                               style="top:12px; left:12px; border-radius:10px; font-weight:800;"
                               th:text="'-' + ${product.discountPercent} + '%'"></span>
@@ -113,7 +113,7 @@
                         cartBadge.classList.remove('d-none');
                     }
                     // Hiện thông báo Toast thay vì alert
-                    showNotification("Thành công! Đã thêm vào giỏ hàng bạn nhé.", "success");
+                    showNotification("Đã thêm sản phẩm vào giỏ hàng thành công!", "success");
                 } else {
                     showNotification("Lỗi: " + data.message, "danger");
                 }

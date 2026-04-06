@@ -87,17 +87,22 @@
             <div class="row g-4 mt-2">
                 <div class="col-6 col-md-4 col-lg-3" th:each="p : ${featuredProducts}">
                     <div class="card product-card">
-                        <a th:href="@{/product/{id}(id=${p.id})}">
-                            <div class="product-img-wrap">
-                                <img th:src="${p.imageUrl ?: '/images/default.png'}">
-                                <span th:if="${p.discountPercent > 0}" class="discount-badge" th:text="'-' + ${p.discountPercent} + '%'"></span>
-                            </div>
-                        </a>
+                        <div class="product-img-wrap">
+                            <a th:href="@{/product/{id}(id=${p.id})}">
+                                <img th:src="${p.imageUrl ?: '/images/default.png'}" th:alt="${p.name}">
+                            </a>
+                            <span th:if="${p.discountPercent > 0}" class="discount-badge" th:text="'-' + ${p.discountPercent} + '%'"></span>
+                        </div>
+
                         <div class="card-body text-center">
-                            <h6 class="fw-bold text-truncate" th:text="${p.name}">Tên SP</h6>
+                            <a th:href="@{/product/{id}(id=${p.id})}" class="text-decoration-none text-dark">
+                                <h6 class="fw-bold text-truncate" th:text="${p.name}">Tên SP</h6>
+                            </a>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="price-tag" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + 'đ'"></span>
-                                <button type="button" class="cart-btn" th:onclick="|addToCart('${p.id}')|"><i class="fas fa-cart-plus"></i></button>
+                                <button type="button" class="cart-btn" th:onclick="|addToCart('${p.id}')|">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -108,51 +113,57 @@
 
     <script th:inline="javascript">
         function addToCart(productId) {
-            // 1. Lấy mã bảo mật CSRF (Rất quan trọng để không bị lỗi 403)
-            const header = document.querySelector('meta[name="_csrf_header"]').content;
-            const token = document.querySelector('meta[name="_csrf"]').content;
+            const headerEl = document.querySelector('meta[name="_csrf_header"]');
+            const tokenEl = document.querySelector('meta[name="_csrf"]');
 
-            // 2. Gửi yêu cầu thêm vào giỏ
+            if (!headerEl || !tokenEl) {
+                showNotification("Vui lòng đăng nhập để mua sắm!", "warning");
+                return;
+            }
+
+            // Trang Home mặc định mua 1 cái
+            const quantity = 1;
+
             fetch('/api/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    [header]: token
+                    [headerEl.content]: tokenEl.content
                 },
-                body: `productId=${productId}&quantity=1`
+                body: `productId=${productId}&quantity=${quantity}`
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // 3. Cập nhật số lượng trên Header ngay lập tức
-                    const badge = document.querySelector('.cart-badge'); // Tên class bác đặt ở Header
+                    const badge = document.querySelector('.cart-badge') || document.querySelector('.badge-cart');
                     if (badge) {
                         badge.textContent = data.cartCount;
                         badge.classList.remove('d-none');
                     }
-
-                    // 4. Hiển thị thông báo Toast đẹp mắt
-                    showToast("Thêm vào giỏ hàng thành công!", "success");
+                    showNotification("Đã thêm vào giỏ hàng!", "success");
                 } else {
-                    showToast("Lỗi: " + data.message, "danger");
+                    showNotification(data.message, "danger");
                 }
             })
             .catch(err => {
-                showToast("Bạn cần đăng nhập để thêm vào giỏ hàng nhé!", "warning");
+                showNotification("Bạn cần đăng nhập để mua sắm!", "warning");
             });
         }
 
-        // Hàm hiển thị thông báo Toast
-        function showToast(message, type) {
-            const toastEl = document.getElementById('cartToast');
-            const toastMsg = document.getElementById('toastMsg');
-
-            // Đổi màu theo loại thông báo (success, danger, warning)
-            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
-            toastMsg.textContent = message;
-
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
+        // Giữ nguyên hàm showNotification của bác vì nó quá đẹp rồi!
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? '#2ecc71' : (type === 'danger' ? '#e74c3c' : '#f1c40f');
+            toast.className = 'custom-toast p-3 text-white position-fixed shadow-lg';
+            toast.style.cssText = `top:120px; right:20px; z-index:9999; border-radius:15px; background:${bgColor}; font-weight:700; min-width:250px; transition: all 0.5s ease; transform: translateX(120%);`;
+            toast.innerHTML = `<div class="d-flex align-items-center"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2 fs-5"></i><span>${message}</span></div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 100);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(120%)';
+                setTimeout(() => toast.remove(), 500);
+            }, 2500);
         }
     </script>
 </section>

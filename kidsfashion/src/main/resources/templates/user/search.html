@@ -58,7 +58,7 @@
                 <div class="card product-card">
                     <div class="product-img-wrap">
                         <a th:href="@{/product/{id}(id=${product.id})}">
-                            <img th:src="${product.imageUrl ?: '/images/default-product.png'}" th:alt="${product.name}"/>
+                            <img th:src="${product.imageUrl}" th:alt="${product.name}"/>
                         </a>
                         <span th:if="${product.stockQuantity <= 0}" class="badge bg-secondary position-absolute" style="top:10px; right:10px;">Hết hàng</span>
                     </div>
@@ -102,11 +102,19 @@
 
     <script th:inline="javascript">
         function addToCart(productId) {
-            // 1. Lấy mã bảo mật CSRF (Rất quan trọng để không bị lỗi 403)
-            const header = document.querySelector('meta[name="_csrf_header"]').content;
-            const token = document.querySelector('meta[name="_csrf"]').content;
+            // 1. Lấy mã bảo mật CSRF (Tránh lỗi 403 khi Deploy)
+            const headerEl = document.querySelector('meta[name="_csrf_header"]');
+            const tokenEl = document.querySelector('meta[name="_csrf"]');
 
-            // 2. Gửi yêu cầu thêm vào giỏ
+            if (!headerEl || !tokenEl) {
+                showNotification("Lỗi hệ thống: Thiếu mã bảo mật CSRF", "danger");
+                return;
+            }
+
+            const header = headerEl.content;
+            const token = tokenEl.content;
+
+            // 2. Gửi yêu cầu thêm vào giỏ (Mặc định số lượng là 1 cho trang danh sách)
             fetch('/api/cart/add', {
                 method: 'POST',
                 headers: {
@@ -118,35 +126,61 @@
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    // 3. Cập nhật số lượng trên Header ngay lập tức
-                    const badge = document.querySelector('.cart-badge');
+                    // 3. Cập nhật số lượng trên Header
+                    const badge = document.querySelector('.cart-badge') || document.querySelector('.badge-cart');
                     if (badge) {
                         badge.textContent = data.cartCount;
                         badge.classList.remove('d-none');
                     }
 
-                    // 4. Hiển thị thông báo Toast đẹp mắt
-                    showToast("Thêm vào giỏ hàng thành công!", "success");
+                    // 4. Gọi hàm thông báo MỚI trượt từ lề phải
+                    showNotification("Đã thêm sản phẩm vào giỏ hàng thành công!", "success");
                 } else {
-                    showToast("Lỗi: " + data.message, "danger");
+                    showNotification("Lỗi: " + data.message, "danger");
                 }
             })
             .catch(err => {
-                showToast("Bạn cần đăng nhập để thêm vào giỏ hàng nhé!", "warning");
+                showNotification("Bạn cần đăng nhập để mua sắm!", "warning");
             });
         }
 
-        // Hàm hiển thị thông báo Toast
-        function showToast(message, type) {
-            const toastEl = document.getElementById('cartToast');
-            const toastMsg = document.getElementById('toastMsg');
+        // HÀM THÔNG BÁO TỰ TẠO (Đồng bộ toàn hệ thống)
+        function showNotification(message, type) {
+            const toast = document.createElement('div');
+            // Màu sắc đồng bộ: Thành công (Xanh lá), Lỗi (Đỏ), Cảnh báo (Vàng)
+            const bgColor = type === 'success' ? '#2ecc71' : (type === 'danger' ? '#e74c3c' : '#f1c40f');
 
-            // Đổi màu theo loại thông báo (success, danger, warning)
-            toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
-            toastMsg.textContent = message;
+            toast.className = 'custom-toast p-3 text-white position-fixed shadow-lg';
+            toast.style.cssText = `
+                top:120px;
+                right:20px;
+                z-index:9999;
+                border-radius:15px;
+                background:${bgColor};
+                font-weight:700;
+                min-width: 250px;
+                transition: all 0.5s ease;
+                transform: translateX(120%);
+            `;
 
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2 fs-5"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            // Hiệu ứng trượt vào sau 100ms
+            setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 100);
+
+            // Tự động xóa sau 2.5 giây
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(120%)';
+                setTimeout(() => toast.remove(), 500);
+            }, 2500);
         }
     </script>
 </section>

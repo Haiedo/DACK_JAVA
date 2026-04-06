@@ -52,11 +52,13 @@
                         <div class="card-body p-0">
                             <div th:each="item : ${cartItems}" class="cart-item d-flex align-items-center gap-3 p-3"
                                  th:id="'item-row-' + ${item.id}"
-                                 th:data-id="${item.id}" th:data-price="${item.product.price}" th:data-qty="${item.quantity}">
+                                 th:data-id="${item.id}"
+                                 th:data-price="${item.product.price}"
+                                 th:data-qty="${item.quantity}">
 
                                 <input class="form-check-input cart-checkbox item-checkbox ms-1" type="checkbox" checked th:value="${item.id}">
 
-                                <img th:src="${item.product.imageUrl ?: '/images/default.png'}" class="cart-item-img shadow-sm"/>
+                                <img th:src="${item.product.imageUrl ?: '/images/default.png'}" class="cart-item-img shadow-sm" th:alt="${item.product.name}"/>
 
                                 <div class="flex-grow-1">
                                     <h6 class="fw-700 mb-1" th:text="${item.product.name}">Tên SP</h6>
@@ -262,16 +264,21 @@
         }
 
         function removeItem(id) {
-            if (!confirm('Xóa sản phẩm này hả bạn?')) return;
+            if (!confirm('Bạn muốn bỏ sản phẩm này khỏi giỏ hàng?')) return;
+
             const header = document.querySelector('meta[name="_csrf_header"]').content;
             const token  = document.querySelector('meta[name="_csrf"]').content;
+
             fetch('/api/cart/remove', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded', [header]: token },
                 body: `itemId=${id}`
-            }).then(() => {
-                document.getElementById('item-row-' + id).remove();
-                updateSummary();
+            }).then(res => res.json()).then(data => {
+                if(data.success) {
+                    document.getElementById('item-row-' + id).remove();
+                    updateSummary();
+                    showNotification("Đã xóa sản phẩm!", "success");
+                }
             });
         }
 
