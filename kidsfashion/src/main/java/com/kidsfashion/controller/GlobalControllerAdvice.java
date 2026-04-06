@@ -21,17 +21,22 @@ public class GlobalControllerAdvice {
     public void addAttributes(Model model, Authentication auth, HttpSession session, HttpServletRequest request) {
         String uri = request.getRequestURI();
 
-        // NẾU LÀ TRANG LỖI HOẶC TRANG LOGIN THÌ DỪNG NGAY (THOÁT LOOP)
-        if (uri.contains("/error") || uri.contains("/login") || uri.contains("/images") || uri.contains("/uploads")) {
+        // 1. Thoát ngay nếu là trang tĩnh hoặc trang lỗi để tránh loop
+        if (uri.contains("/error") || uri.contains("/login") || uri.contains("/images") || uri.contains("/uploads") || uri.contains("/css") || uri.contains("/js")) {
             return;
         }
 
+        // 2. Kiểm tra đăng nhập
         if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal().toString())) {
             try {
-                User user = userService.findByUsername(auth.getName()).orElse(null);
+                // SỬA Ở ĐÂY: Tìm bằng Email vì Principal lúc này đang chứa Email bác nhé!
+                String loginId = auth.getName();
+                User user = userService.findByEmail(loginId)
+                        .orElseGet(() -> userService.findByUsername(loginId).orElse(null));
+
                 if (user != null) {
-                    model.addAttribute("user", user);
-                    // Bọc giỏ hàng vào try-catch để nếu lỗi DB cũng không làm reload trang
+                    model.addAttribute("user", user); // Bây giờ biến 'user' đã có avatarUrl chuẩn
+
                     try {
                         model.addAttribute("cartCount", cartService.getCartCount(user, session.getId()));
                     } catch (Exception e) {
@@ -39,7 +44,7 @@ public class GlobalControllerAdvice {
                     }
                 }
             } catch (Exception e) {
-                // Lỗi thì thôi, thoát ra để web hiện trang lỗi bình thường, không loop
+                System.out.println("Lỗi nạp User Global: " + e.getMessage());
             }
         }
     }

@@ -126,9 +126,11 @@
 
                 <div sec:authorize="isAuthenticated()" class="dropdown">
                     <button class="btn user-dropdown-btn d-flex align-items-center shadow-sm dropdown-toggle border-0" data-bs-toggle="dropdown">
-                        <img th:src="${user != null && user.avatarUrl != null ? user.avatarUrl : '/images/default-avatar.png'}"
+                        <img th:src="${user?.avatarUrl != null ? user.avatarUrl : '/images/default-avatar.png'}"
                              class="user-avatar me-2">
-                        <span class="d-none d-md-inline" sec:authentication="name">User</span>
+                        <span class="d-none d-md-inline" th:text="${user != null ? user.fullName : 'User'}">
+                            User
+                        </span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow mt-3 p-2">
                         <li><a class="dropdown-item rounded-3" href="/user/profile"><i class="fas fa-user-edit me-2"></i>Hồ sơ của bạn</a></li>

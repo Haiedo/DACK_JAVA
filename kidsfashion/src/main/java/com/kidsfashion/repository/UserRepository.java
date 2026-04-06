@@ -23,5 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> searchUsers(@Param("keyword") String keyword, Pageable pageable);
 
     long countByActiveTrue();
-    
+
+
 }

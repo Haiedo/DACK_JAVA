@@ -1,6 +1,7 @@
 package com.kidsfashion.config;
 
 import com.kidsfashion.service.CustomUserDetailsService;
+import com.kidsfashion.service.OAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,12 +22,18 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    @Autowired
+    private OAuth2UserService oauth2UserService;
+
     @Bean
     public HttpFirewall allowDoubleSlashHttpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
-        firewall.setAllowUrlEncodedDoubleSlash(true); // Cho phép dấu //
-        firewall.setAllowSemicolon(true); // Cho phép dấu ;
-        firewall.setAllowBackSlash(true); // Cho phép dấu \
+        firewall.setAllowUrlEncodedDoubleSlash(true);
+        firewall.setAllowSemicolon(true);
+        firewall.setAllowBackSlash(true);
         return firewall;
     }
 
@@ -36,8 +43,6 @@ public class SecurityConfig {
                 "/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico", "/error"
         );
     }
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -60,28 +65,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.setSharedObject(HttpFirewall.class, allowDoubleSlashHttpFirewall());
+
         http
-                .csrf(csrf -> csrf.disable()) // Tạm thời disable nếu bác đang bị lỗi 403
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**", "/favicon.ico", "/error").permitAll() // Mở toang các cổng này
-                        .requestMatchers("/", "/login", "/register", "/shop/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/shop/**", "/product/**", "/search/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .loginProcessingUrl("/login")
                         .defaultSuccessUrl("/", true)
-                        .failureUrl("/login?error=true")
                         .permitAll()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        // ĐÂY LÀ ĐOẠN QUAN TRỌNG ĐỂ LƯU USER VÀO DATABASE
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(oauth2UserService)
+                        )
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=oauth2_fail")
                 )
                 .logout(logout -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
                         .logoutSuccessUrl("/login?logout=true")
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
                         .permitAll()
-                )
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
+                );
 
         return http.build();
     }

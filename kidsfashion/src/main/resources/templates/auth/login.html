@@ -59,6 +59,20 @@
                         <i class="fas fa-sign-in-alt me-2"></i>Đăng Nhập
                     </button>
                 </form>
+                <div class="divider d-flex align-items-center my-4">
+                    <hr class="flex-grow-1" style="border-top: 2px solid #f0d0e0;">
+                    <span class="mx-3 text-muted fw-bold small">HOẶC</span>
+                    <hr class="flex-grow-1" style="border-top: 2px solid #f0d0e0;">
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a th:href="@{/oauth2/authorization/google}" class="btn btn-outline-danger rounded-pill fw-700 p-2">
+                        <i class="fab fa-google me-2"></i> Tiếp tục với Google
+                    </a>
+                    <a th:href="@{/oauth2/authorization/github}" class="btn btn-outline-dark rounded-pill fw-700 p-2">
+                        <i class="fab fa-github me-2"></i> Tiếp tục với GitHub
+                    </a>
+                </div>
                 <div class="text-center mt-4">
                     <span class="text-muted">Chưa có tài khoản? </span>
                     <a href="/register" style="color:var(--primary);font-weight:700;text-decoration:none;">Đăng ký ngay</a>
