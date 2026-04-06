@@ -4,30 +4,78 @@
 <head>
     <th:block th:fragment="extraStyles">
         <style>
-            /* GIỮ NGUYÊN CSS RIÊNG CỦA TRANG HOME BÁC GỬI */
-            .hero { background:linear-gradient(135deg,#fff0f5 0%,#ffe8f0 50%,#fff5e0 100%); padding:80px 0; }
-            .hero h1 { font-size:3.5rem; font-weight:900; color:#2d3436; }
-            .hero h1 span { color:var(--primary); }
-            .btn-primary { background:var(--primary); border-color:var(--primary); border-radius:50px; padding:12px 30px; font-weight:700; }
-            .btn-primary:hover { background:var(--primary-dark); border-color:var(--primary-dark); }
+            /* CSS BANNER HERO MỚI - CHÂN THỰC & SANG TRỌNG */
+            .hero {
+                background: linear-gradient(135deg, #fff0f5 0%, #ffe8f0 50%, #fff5e0 100%);
+                padding: 100px 0;
+                position: relative;
+                overflow: hidden;
+            }
 
+            /* Hiệu ứng trang trí bay bổng */
+            .hero::before {
+                content: '✨'; position: absolute; top: 15%; left: 5%; font-size: 1.5rem; opacity: 0.4; animation: float 4s infinite;
+            }
+            .hero::after {
+                content: '🎈'; position: absolute; bottom: 10%; right: 10%; font-size: 2.5rem; opacity: 0.3; animation: float 5s infinite;
+            }
+
+            .hero h1 { font-size: 3.8rem; font-weight: 900; color: #2d3436; line-height: 1.2; }
+            .hero h1 span { color: var(--primary); position: relative; display: inline-block; }
+
+            /* Gạch chân lượn sóng cho chữ Trẻ Em */
+            .hero h1 span::after {
+                content: '〰️'; position: absolute; bottom: -12px; left: 0; width: 100%; color: var(--secondary); font-size: 1.2rem;
+            }
+
+            /* Nút Mua Sắm Ngay kiểu mới */
+            .btn-hero {
+                background: var(--primary); color: white; border: none; border-radius: 50px;
+                padding: 15px 40px; font-weight: 800; font-size: 1.1rem; text-transform: uppercase;
+                box-shadow: 0 10px 20px rgba(255, 107, 157, 0.3); transition: all 0.3s ease;
+                text-decoration: none; display: inline-block; margin-top: 30px;
+            }
+            .btn-hero:hover {
+                background: var(--primary-dark); transform: translateY(-3px);
+                box-shadow: 0 15px 25px rgba(255, 107, 157, 0.4); color: white;
+            }
+
+            /* Khung ảnh bé bên phải */
+            .hero-img-wrap { position: relative; z-index: 2; }
+            .hero-img-wrap img {
+                width: 100%; max-width: 480px; border-radius: 30px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1); border: 12px solid white;
+                transition: transform 0.5s ease;
+            }
+            .hero-img-wrap:hover img { transform: scale(1.02) rotate(1deg); }
+
+            /* Vòng tròn trang trí sau ảnh */
+            .hero-bg-circle {
+                position: absolute; top: -30px; right: -30px; width: 300px; height: 300px;
+                background: var(--primary); border-radius: 50%; opacity: 0.1; z-index: 1;
+            }
+
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-15px); }
+            }
+
+            /* CSS CHO CÁC PHẦN DƯỚI */
             .carousel-main { border-radius: 25px; overflow: hidden; box-shadow: 0 10px 30px rgba(255,107,157,0.1); margin-bottom: 30px; }
             .carousel-main img { height: 420px; object-fit: cover; }
+            .service-link { text-decoration: none; color: inherit; display: block; }
             .service-box { position: relative; border-radius: 20px; overflow: hidden; height: 260px; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
             .service-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s; }
             .service-box:hover img { transform: scale(1.1); }
             .service-box-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 20px; color: white; }
             .service-box-title { font-weight: 800; font-size: 1.3rem; margin-bottom: 5px; }
             .service-box-line { width: 40px; height: 3px; background: var(--primary); border-radius: 2px; }
-
             .product-card { border:none; border-radius:20px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.08); transition:all .3s; height:100%; }
             .product-card:hover { transform:translateY(-8px); box-shadow:0 12px 35px rgba(255,107,157,.25); }
             .product-img-wrap { position:relative; overflow:hidden; background:#fff0f5; height:230px; display:flex; align-items:center; justify-content:center; }
             .product-img-wrap img { width:100%; height:100%; object-fit:cover; }
-            .discount-badge { position:absolute; top:12px; left:12px; background:var(--primary); color:#fff; border-radius:10px; padding:3px 10px; font-size:.75rem; font-weight:800; }
             .price-tag { color:var(--primary); font-weight:800; font-size:1.15rem; }
             .cart-btn { background:var(--primary); color:#fff; border:none; border-radius:50%; width:38px; height:38px; display:flex; align-items:center; justify-content:center; transition:.2s; }
-            .cart-btn:hover { background:var(--primary-dark); transform:scale(1.1); }
             .custom-slider-section { padding: 40px 0; background: #fff; }
         </style>
     </th:block>
@@ -36,46 +84,59 @@
 
 <section>
     <div class="hero">
-        <div class="container text-center text-lg-start">
+        <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6">
-                    <p class="text-muted fw-bold mb-2">✨ Bộ sưu tập mới nhất 2026</p>
-                    <h1>Thời Trang <span>Trẻ Em</span><br/>Xinh Xắn & Thoải Mái</h1>
-                    <p class="lead text-muted mt-3">Khám phá hàng trăm mẫu quần áo đẹp cho bé yêu!</p>
-                    <a href="/shop" class="btn btn-primary btn-lg mt-4">Mua Sắm Ngay</a>
+                <div class="col-lg-7 text-center text-lg-start">
+                    <p class="text-uppercase fw-bold text-primary mb-2" style="letter-spacing: 2px;">🧸 BST Mới Nhất 2026</p>
+                    <h1>Thời Trang <span>Trẻ Em</span><br/>Xinh Xắn & Theo Xu Hướng</h1>
+                    <p class="lead text-muted mt-4">Khám phá hàng trăm mẫu quần áo đẹp, chất liệu an toàn và thoải mái nhất cho bé yêu của bạn.</p>
+                    <a href="/shop" class="btn-hero">Mua Sắm Ngay <i class="fas fa-arrow-right ms-2"></i></a>
                 </div>
-                <div class="col-lg-6 text-center d-none d-lg-block" style="font-size:12rem;">👗</div>
+
+                <div class="col-lg-5 text-center d-none d-lg-block position-relative">
+                    <div class="hero-bg-circle"></div>
+                    <div class="hero-img-wrap">
+                        <img th:src="@{/images/story1.jpg}" alt="KidsFashion" class="img-fluid">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="custom-slider-section">
         <div class="container">
-            <div id="newHeroCarousel" class="carousel slide carousel-main" data-bs-ride="carousel">
+            <div id="newHeroCarousel" class="carousel slide carousel-main" data-bs-ride="carousel" data-bs-interval="3000">
                 <div class="carousel-inner">
-                    <div class="carousel-item active"><img src="https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2000" class="d-block w-100"></div>
-                    <div class="carousel-item"><img src="https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=2000" class="d-block w-100"></div>
+                    <div class="carousel-item active"><img th:src="@{/images/slide1.jpg}" class="d-block w-100"></div>
+                    <div class="carousel-item"><img th:src="@{/images/slide2.jpg}" class="d-block w-100"></div>
+                    <div class="carousel-item"><img th:src="@{/images/slide3.jpg}" class="d-block w-100"></div>
                 </div>
             </div>
 
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="service-box shadow-sm">
-                        <img src="https://images.unsplash.com/photo-1519452635265-7b1fbfd1e4e0?q=80&w=800">
-                        <div class="service-box-overlay"><h4 class="service-box-title">Chuyện Của Bé</h4><div class="service-box-line"></div></div>
-                    </div>
+                    <a href="/story" class="service-link">
+                        <div class="service-box shadow-sm">
+                            <img th:src="@{/images/story1.jpg}">
+                            <div class="service-box-overlay"><h4 class="service-box-title">Chuyện Của Bé</h4><div class="service-box-line"></div></div>
+                        </div>
+                    </a>
                 </div>
                 <div class="col-md-4">
-                    <div class="service-box shadow-sm">
-                        <img src="https://images.unsplash.com/photo-1444858291040-58f756a3bdd6?q=80&w=800">
-                        <div class="service-box-overlay"><h4 class="service-box-title">Giới thiệu</h4><div class="service-box-line"></div></div>
-                    </div>
+                    <a href="/about" class="service-link">
+                        <div class="service-box shadow-sm">
+                            <img th:src="@{/images/story2.jpg}">
+                            <div class="service-box-overlay"><h4 class="service-box-title">Giới thiệu</h4><div class="service-box-line"></div></div>
+                        </div>
+                    </a>
                 </div>
                 <div class="col-md-4">
-                    <div class="service-box shadow-sm">
-                        <img src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?q=80&w=800">
-                        <div class="service-box-overlay"><h4 class="service-box-title">Liên hệ</h4><div class="service-box-line"></div></div>
-                    </div>
+                    <a href="/contact" class="service-link">
+                        <div class="service-box shadow-sm">
+                            <img th:src="@{/images/story3.jpg}">
+                            <div class="service-box-overlay"><h4 class="service-box-title">Liên hệ</h4><div class="service-box-line"></div></div>
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
@@ -87,22 +148,17 @@
             <div class="row g-4 mt-2">
                 <div class="col-6 col-md-4 col-lg-3" th:each="p : ${featuredProducts}">
                     <div class="card product-card">
-                        <div class="product-img-wrap">
-                            <a th:href="@{/product/{id}(id=${p.id})}">
-                                <img th:src="${p.imageUrl ?: '/images/default.png'}" th:alt="${p.name}">
-                            </a>
-                            <span th:if="${p.discountPercent > 0}" class="discount-badge" th:text="'-' + ${p.discountPercent} + '%'"></span>
-                        </div>
-
+                        <a th:href="@{/product/{id}(id=${p.id})}">
+                            <div class="product-img-wrap">
+                                <img th:src="${p.imageUrl ?: '/images/default.png'}">
+                                <span th:if="${p.discountPercent > 0}" class="discount-badge" th:text="'-' + ${p.discountPercent} + '%'"></span>
+                            </div>
+                        </a>
                         <div class="card-body text-center">
-                            <a th:href="@{/product/{id}(id=${p.id})}" class="text-decoration-none text-dark">
-                                <h6 class="fw-bold text-truncate" th:text="${p.name}">Tên SP</h6>
-                            </a>
+                            <h6 class="fw-bold text-truncate" th:text="${p.name}">Tên SP</h6>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="price-tag" th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + 'đ'"></span>
-                                <button type="button" class="cart-btn" th:onclick="|addToCart('${p.id}')|">
-                                    <i class="fas fa-cart-plus"></i>
-                                </button>
+                                <button type="button" class="cart-btn" th:onclick="|addToCart('${p.id}')|"><i class="fas fa-cart-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -112,61 +168,42 @@
     </div>
 
     <script th:inline="javascript">
-        function addToCart(productId) {
-            const headerEl = document.querySelector('meta[name="_csrf_header"]');
-            const tokenEl = document.querySelector('meta[name="_csrf"]');
-
-            if (!headerEl || !tokenEl) {
-                showNotification("Vui lòng đăng nhập để mua sắm!", "warning");
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+            const myCarousel = document.querySelector('#newHeroCarousel');
+            if (myCarousel) {
+                new bootstrap.Carousel(myCarousel, { interval: 3000, ride: 'carousel' });
             }
+        });
 
-            // Trang Home mặc định mua 1 cái
-            const quantity = 1;
-
+        function addToCart(productId) {
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+            const token = document.querySelector('meta[name="_csrf"]').content;
             fetch('/api/cart/add', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    [headerEl.content]: tokenEl.content
-                },
-                body: `productId=${productId}&quantity=${quantity}`
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', [header]: token },
+                body: `productId=${productId}&quantity=1`
             })
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
-                    const badge = document.querySelector('.cart-badge') || document.querySelector('.badge-cart');
-                    if (badge) {
-                        badge.textContent = data.cartCount;
-                        badge.classList.remove('d-none');
-                    }
-                    showNotification("Đã thêm vào giỏ hàng!", "success");
-                } else {
-                    showNotification(data.message, "danger");
-                }
-            })
-            .catch(err => {
-                showNotification("Bạn cần đăng nhập để mua sắm!", "warning");
-            });
+                    const badge = document.querySelector('.cart-badge');
+                    if (badge) { badge.textContent = data.cartCount; badge.classList.remove('d-none'); }
+                    showToast("Thêm vào giỏ hàng thành công!", "success");
+                } else { showToast("Lỗi: " + data.message, "danger"); }
+            }).catch(err => { showToast("Bạn cần đăng nhập để mua hàng!", "warning"); });
         }
 
-        // Giữ nguyên hàm showNotification của bác vì nó quá đẹp rồi!
-        function showNotification(message, type) {
-            const toast = document.createElement('div');
-            const bgColor = type === 'success' ? '#2ecc71' : (type === 'danger' ? '#e74c3c' : '#f1c40f');
-            toast.className = 'custom-toast p-3 text-white position-fixed shadow-lg';
-            toast.style.cssText = `top:120px; right:20px; z-index:9999; border-radius:15px; background:${bgColor}; font-weight:700; min-width:250px; transition: all 0.5s ease; transform: translateX(120%);`;
-            toast.innerHTML = `<div class="d-flex align-items-center"><i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2 fs-5"></i><span>${message}</span></div>`;
-            document.body.appendChild(toast);
-            setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 100);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(120%)';
-                setTimeout(() => toast.remove(), 500);
-            }, 2500);
+        function showToast(message, type) {
+            const toastEl = document.getElementById('cartToast');
+            const toastMsg = document.getElementById('toastMsg');
+            if(toastEl && toastMsg) {
+                toastEl.className = `toast align-items-center text-white bg-${type} border-0`;
+                toastMsg.textContent = message;
+                const toast = new bootstrap.Toast(toastEl);
+                toast.show();
+            }
         }
     </script>
 </section>
-
 </body>
 </html>

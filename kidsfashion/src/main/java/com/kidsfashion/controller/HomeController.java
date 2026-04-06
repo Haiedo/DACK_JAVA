@@ -57,4 +57,21 @@ public class HomeController {
             return "user/product-detail";
         }).orElse("redirect:/shop");
     }
+    // Điều hướng cho trang Chuyện của bé
+    @GetMapping("/story")
+    public String storyPage() {
+        return "user/story"; // Thêm "user/" vào trước
+    }
+
+    // Điều hướng cho trang Giới thiệu
+    @GetMapping("/about")
+    public String aboutPage() {
+        return "user/about"; // Thêm "user/" vào trước
+    }
+
+    // Điều hướng cho trang Liên hệ
+    @GetMapping("/contact")
+    public String contactPage() {
+        return "user/contact"; // Thêm "user/" vào trước
+    }
 }

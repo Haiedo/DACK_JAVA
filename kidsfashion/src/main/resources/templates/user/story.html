@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{fragments/layout :: main_layout(~{::section}, 'Chuyện Của Bé', ~{::extraStyles})}">
+<head>
+    <th:block th:fragment="extraStyles">
+        <style>
+            .story-img { border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+            .fw-900 { font-weight: 900; }
+        </style>
+    </th:block>
+</head>
+<body>
+<section class="py-5">
+    <div class="container">
+        <a href="/" class="btn btn-outline-danger rounded-pill mb-4">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại trang chủ
+        </a>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-900 mb-4" style="color: var(--primary);">📖 Chuyện Của Bé</h1>
+                <p class="lead text-muted">Nơi chia sẻ những khoảnh khắc đáng yêu và kinh nghiệm chọn đồ cho bé yêu của bạn.</p>
+                <hr class="my-5">
+                <div class="text-start">
+                    <h3 class="fw-bold">Hành trình KidsFashion</h3>
+                    <p>KidsFashion ra đời với mong muốn mang lại những bộ trang phục an toàn, mềm mại và xinh xắn nhất cho các thiên thần nhỏ. Chúng tôi tin rằng mỗi bộ quần áo không chỉ là thời trang, mà còn là tình yêu thương gửi gắm đến bé.</p>
+                    <img th:src="@{/images/story3detail.jpg}" class="img-fluid story-img my-4" alt="Story">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>
