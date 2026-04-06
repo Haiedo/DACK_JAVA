@@ -32,7 +32,7 @@ public class Product {
     @Column(name = "stock_quantity")
     private Integer stockQuantity = 0;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 1000)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)

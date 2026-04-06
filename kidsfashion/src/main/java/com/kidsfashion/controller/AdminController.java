@@ -1,5 +1,7 @@
 package com.kidsfashion.controller;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.kidsfashion.model.*;
 import com.kidsfashion.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.nio.file.*;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -81,6 +84,9 @@ public class AdminController {
         }).orElse("redirect:/admin/products");
     }
 
+    @Autowired
+    private Cloudinary cloudinary;
+    /*
     @PostMapping("/products/save")
     public String saveProduct(@ModelAttribute Product product,
                               @RequestParam(required = false) MultipartFile imageFile,
@@ -112,6 +118,41 @@ public class AdminController {
         }
         return "redirect:/admin/products";
     }
+    */
+
+    @PostMapping("/products/save")
+    public String saveProduct(@ModelAttribute Product product,
+                              @RequestParam(required = false) MultipartFile imageFile,
+                              @RequestParam(required = false) Long categoryId,
+                              RedirectAttributes ra) {
+        try {
+            // 1. Gán Category (Giữ nguyên của bác)
+            if (categoryId != null) {
+                categoryService.getCategoryById(categoryId).ifPresent(product::setCategory);
+            }
+
+            // 2. Xử lý Upload ảnh lên Cloudinary
+            if (imageFile != null && !imageFile.isEmpty()) {
+                // Gửi file lên Cloudinary
+                Map uploadResult = cloudinary.uploader().upload(imageFile.getBytes(),
+                        ObjectUtils.asMap("resource_type", "auto"));
+
+                // Lấy link URL tuyệt đối (https://res.cloudinary.com/...)
+                String imageUrl = uploadResult.get("secure_url").toString();
+
+                // Lưu link này vào Database luôn bác nhé
+                product.setImageUrl(imageUrl);
+            }
+
+            productService.saveProduct(product);
+            ra.addFlashAttribute("success", "Lưu sản phẩm lên mây thành công!");
+        } catch (Exception e) {
+            e.printStackTrace(); // In lỗi ra Logs Render để bác dễ soi bệnh
+            ra.addFlashAttribute("error", "Lỗi upload: " + e.getMessage());
+        }
+        return "redirect:/admin/products";
+    }
+
 
     @PostMapping("/products/delete/{id}")
     public String deleteProduct(@PathVariable Long id, RedirectAttributes ra) {
