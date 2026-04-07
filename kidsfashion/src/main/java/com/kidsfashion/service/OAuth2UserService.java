@@ -66,12 +66,11 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
                 "email" // CHỐT HẠ: Luôn dùng email làm ID cho cả hai
         );
     }
-    
+
     private void processOAuth2User(String email, String name, String picture) {
-        // 1. CHỐNG LỖI NULL EMAIL: Nếu GitHub giấu email, lấy tạm name làm email giả định
+        // 1. Chống NULL Email (như cũ)
         if (email == null || email.isEmpty()) {
-            // Tạo email tạm để không bị lỗi DB và logic bên dưới
-            email = (name != null ? name.replaceAll("\\s+", "").toLowerCase() : "github_user") + "@github.com";
+            email = (name != null ? name.replaceAll("\\s+", "").toLowerCase() : "user") + "@github.com";
         }
 
         Optional<User> existUser = userRepository.findByEmail(email);
@@ -79,22 +78,31 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         if (existUser.isEmpty()) {
             User newUser = new User();
 
-            // 2. XỬ LÝ USERNAME AN TOÀN
-            String customUsername;
+            // 2. XỬ LÝ USERNAME THÔNG MINH (Chống trùng lặp)
+            String baseUsername;
             if (email.contains("@")) {
-                customUsername = email.substring(0, email.indexOf("@"));
+                baseUsername = email.substring(0, email.indexOf("@"));
             } else {
-                customUsername = email;
+                baseUsername = (name != null) ? name.replaceAll("\\s+", "").toLowerCase() : "user";
             }
 
-            newUser.setUsername(customUsername);
+            // Kiểm tra xem username đã tồn tại chưa, nếu có thì thêm số ngẫu nhiên
+            String finalUsername = baseUsername;
+            int count = 1;
+            while (userRepository.findByUsername(finalUsername).isPresent()) {
+                finalUsername = baseUsername + (int)(Math.random() * 1000); // Ví dụ: hainam -> hainam823
+                count++;
+                if(count > 10) break; // Tránh vòng lặp vô tận nếu quá đen
+            }
+
+            newUser.setUsername(finalUsername);
             newUser.setEmail(email);
-            newUser.setFullName(name != null ? name : customUsername);
+            newUser.setFullName(name != null ? name : finalUsername);
             newUser.setAvatarUrl(picture);
             newUser.setPassword("");
             newUser.setActive(true);
 
-            // Cấp Role (như cũ)
+            // 3. Gán Role (Dùng ID=2 như bác đang chạy ổn)
             roleRepository.findById(2L).ifPresent(role -> {
                 Set<Role> roles = new HashSet<>();
                 roles.add(role);
@@ -103,6 +111,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
             userRepository.save(newUser);
         } else {
+            // Nếu user đã tồn tại, chỉ cập nhật ảnh đại diện
             User user = existUser.get();
             user.setAvatarUrl(picture);
             userRepository.save(user);
