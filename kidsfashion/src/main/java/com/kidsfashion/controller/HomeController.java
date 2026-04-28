@@ -41,9 +41,15 @@ public class HomeController {
     public String search(@RequestParam String keyword,
                          @RequestParam(defaultValue = "0") int page,
                          Model model) {
+        // Gửi dữ liệu sản phẩm, từ khóa và danh mục
         model.addAttribute("products", productService.searchProducts(keyword, page, 12));
         model.addAttribute("keyword", keyword);
         model.addAttribute("categories", categoryService.getActiveCategories());
+
+        // --- DÒNG CẦN THÊM ---
+        model.addAttribute("currentPage", page);
+        // ----------------------
+
         return "user/search";
     }
 
